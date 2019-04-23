@@ -1,0 +1,1431 @@
+[
+  {
+    "leader": "00000nam a22003854i 4500",
+    "fields": [
+      {
+        "tag": "001",
+        "value": "9789513246518"
+      },
+      {
+        "tag": "003",
+        "value": "FI-BTJ"
+      },
+      {
+        "tag": "005",
+        "value": "20181016101020.6"
+      },
+      {
+        "tag": "008",
+        "value": "000000s2018    fi ||||j^    |00| f|fin|c"
+      },
+      {
+        "tag": "020",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "978-951-32-4651-8"
+          },
+          {
+            "code": "q",
+            "value": "sidottu"
+          }
+        ]
+      },
+      {
+        "tag": "040",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "FI-BTJ"
+          },
+          {
+            "code": "b",
+            "value": "fin"
+          },
+          {
+            "code": "e",
+            "value": "rda"
+          }
+        ]
+      },
+      {
+        "tag": "041",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "fin"
+          },
+          {
+            "code": "h",
+            "value": "eng"
+          }
+        ]
+      },
+      {
+        "tag": "084",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "85.22"
+          },
+          {
+            "code": "2",
+            "value": "ykl"
+          }
+        ]
+      },
+      {
+        "tag": "091",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "91"
+          }
+        ]
+      },
+      {
+        "tag": "092",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.79"
+          }
+        ]
+      },
+      {
+        "tag": "093",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.79"
+          }
+        ]
+      },
+      {
+        "tag": "094",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.79"
+          }
+        ]
+      },
+      {
+        "tag": "095",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.79"
+          }
+        ]
+      },
+      {
+        "tag": "130",
+        "ind1": "0",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Paw Patrol."
+          },
+          {
+            "code": "l",
+            "value": "suomi"
+          }
+        ]
+      },
+      {
+        "tag": "245",
+        "ind1": "1",
+        "ind2": "0",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Hau hau hauskaa! /"
+          },
+          {
+            "code": "c",
+            "value": "kuvitus: Fabrizio Petrossi ja MJ Illustrations ; suomennos: Jenni Rapelo."
+          }
+        ]
+      },
+      {
+        "tag": "264",
+        "ind1": " ",
+        "ind2": "1",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "[Helsinki] :"
+          },
+          {
+            "code": "b",
+            "value": "Sanoma,"
+          },
+          {
+            "code": "c",
+            "value": "2018."
+          }
+        ]
+      },
+      {
+        "tag": "300",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "70 sivua :"
+          },
+          {
+            "code": "b",
+            "value": "kuvitettu ;"
+          },
+          {
+            "code": "c",
+            "value": "28 cm"
+          }
+        ]
+      },
+      {
+        "tag": "336",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "stillkuva"
+          },
+          {
+            "code": "b",
+            "value": "sti"
+          },
+          {
+            "code": "2",
+            "value": "rdacontent"
+          }
+        ]
+      },
+      {
+        "tag": "336",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "teksti"
+          },
+          {
+            "code": "b",
+            "value": "txt"
+          },
+          {
+            "code": "2",
+            "value": "rdacontent"
+          }
+        ]
+      },
+      {
+        "tag": "337",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "käytettävissä ilman laitetta"
+          },
+          {
+            "code": "b",
+            "value": "n"
+          },
+          {
+            "code": "2",
+            "value": "rdamedia"
+          }
+        ]
+      },
+      {
+        "tag": "338",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "nide"
+          },
+          {
+            "code": "b",
+            "value": "nc"
+          },
+          {
+            "code": "2",
+            "value": "rdacarrier"
+          }
+        ]
+      },
+      {
+        "tag": "490",
+        "ind1": "0",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Paw patrol"
+          }
+        ]
+      },
+      {
+        "tag": "490",
+        "ind1": "0",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Ryhmä Hau"
+          }
+        ]
+      },
+      {
+        "tag": "500",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Perustuu Paw Patrol -televisiosarjaan."
+          }
+        ]
+      },
+      {
+        "tag": "500",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Nickelodeon-tuotantoa."
+          }
+        ]
+      },
+      {
+        "tag": "505",
+        "ind1": "0",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "t",
+            "value": "Reilua peliä ;"
+          },
+          {
+            "code": "t",
+            "value": "Avaruusolento ahdingossa ;"
+          },
+          {
+            "code": "t",
+            "value": "Urheus palkitaan ;"
+          },
+          {
+            "code": "t",
+            "value": "Vallaton vauhtihirmu."
+          }
+        ]
+      },
+      {
+        "tag": "546",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "suomi"
+          }
+        ]
+      },
+      {
+        "tag": "575",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "aineisto at espoo.fi "
+          }
+        ]
+      },
+      {
+        "tag": "599",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "KIRJA / BOK"
+          }
+        ]
+      },
+      {
+        "tag": "650",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "pelastuspalvelu"
+          },
+          {
+            "code": "2",
+            "value": "kaunokki"
+          }
+        ]
+      },
+      {
+        "tag": "650",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "koira"
+          },
+          {
+            "code": "2",
+            "value": "kaunokki"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "lastenkirjallisuus"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "kuvakirjat"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "kertomukset"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "kaunokirjallisuus"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "englanninkielinen kirjallisuus"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "käännökset"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Petrossi, Fabrizio,"
+          },
+          {
+            "code": "e",
+            "value": "taiteilija."
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Rapelo, Jenni,"
+          },
+          {
+            "code": "e",
+            "value": "kääntäjä."
+          }
+        ]
+      },
+      {
+        "tag": "SID",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "2345507"
+          },
+          {
+            "code": "b",
+            "value": "helme"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    ]
+  },
+  {
+    "leader": "00000ngm a22005414i 4500",
+    "fields": [
+      {
+        "tag": "007",
+        "value": "vd cvaiz|"
+      },
+      {
+        "tag": "008",
+        "value": "000000s2018    fi ||| g^         vaeng|c"
+      },
+      {
+        "tag": "024",
+        "ind1": "3",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "8717418528850"
+          }
+        ]
+      },
+      {
+        "tag": "040",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "FI-He"
+          },
+          {
+            "code": "b",
+            "value": "fin"
+          },
+          {
+            "code": "e",
+            "value": "rda"
+          }
+        ]
+      },
+      {
+        "tag": "041",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "eng"
+          },
+          {
+            "code": "a",
+            "value": "ger"
+          },
+          {
+            "code": "a",
+            "value": "fre"
+          },
+          {
+            "code": "a",
+            "value": "swe"
+          },
+          {
+            "code": "a",
+            "value": "dan"
+          },
+          {
+            "code": "a",
+            "value": "nor"
+          },
+          {
+            "code": "a",
+            "value": "fin"
+          },
+          {
+            "code": "a",
+            "value": "dut"
+          },
+          {
+            "code": "j",
+            "value": "eng"
+          },
+          {
+            "code": "j",
+            "value": "ger"
+          },
+          {
+            "code": "j",
+            "value": "fre"
+          },
+          {
+            "code": "j",
+            "value": "swe"
+          },
+          {
+            "code": "j",
+            "value": "dan"
+          },
+          {
+            "code": "j",
+            "value": "nor"
+          },
+          {
+            "code": "j",
+            "value": "fin"
+          },
+          {
+            "code": "j",
+            "value": "dut"
+          },
+          {
+            "code": "h",
+            "value": "eng"
+          }
+        ]
+      },
+      {
+        "tag": "046",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "k",
+            "value": "2018"
+          }
+        ]
+      },
+      {
+        "tag": "049",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "c",
+            "value": "K12"
+          }
+        ]
+      },
+      {
+        "tag": "091",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "89"
+          }
+        ]
+      },
+      {
+        "tag": "092",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.4"
+          }
+        ]
+      },
+      {
+        "tag": "094",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.4"
+          }
+        ]
+      },
+      {
+        "tag": "095",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "1.4"
+          }
+        ]
+      },
+      {
+        "tag": "130",
+        "ind1": "0",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Avenger (elokuva : 2018)"
+          }
+        ]
+      },
+      {
+        "tag": "245",
+        "ind1": "1",
+        "ind2": "0",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Avengers :"
+          },
+          {
+            "code": "b",
+            "value": "Infinity war /"
+          },
+          {
+            "code": "c",
+            "value": "Marvel Studios ; directed by Anthony Russo and Joe Russo ; screenplay by Christopher Markus & Stephen McFeely"
+          }
+        ]
+      },
+      {
+        "tag": "246",
+        "ind1": "1",
+        "ind2": "0",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Infinity war"
+          }
+        ]
+      },
+      {
+        "tag": "264",
+        "ind1": " ",
+        "ind2": "2",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Helsinki :"
+          },
+          {
+            "code": "b",
+            "value": "Walt Disney Studios Home Entertainment,"
+          },
+          {
+            "code": "c",
+            "value": "[2018]"
+          }
+        ]
+      },
+      {
+        "tag": "300",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "2 Blu-ray -videolevyä (2 h 30 min) :"
+          },
+          {
+            "code": "b",
+            "value": "värillinen, ääni "
+          }
+        ]
+      },
+      {
+        "tag": "336",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "kaksiulotteinen liikkuva kuva"
+          },
+          {
+            "code": "b",
+            "value": "tdi"
+          },
+          {
+            "code": "2",
+            "value": "rdacontent"
+          }
+        ]
+      },
+      {
+        "tag": "337",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "video"
+          },
+          {
+            "code": "b",
+            "value": "v"
+          },
+          {
+            "code": "2",
+            "value": "rdamedia"
+          }
+        ]
+      },
+      {
+        "tag": "338",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "videolevy"
+          },
+          {
+            "code": "b",
+            "value": "vd"
+          },
+          {
+            "code": "2",
+            "value": "rdacarrier"
+          }
+        ]
+      },
+      {
+        "tag": "500",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "3D blu-ray -elokuva sekä 2D blu-ray -elokuva"
+          }
+        ]
+      },
+      {
+        "tag": "506",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Kielletty alle 12-vuotiailta"
+          }
+        ]
+      },
+      {
+        "tag": "511",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Robert Downey Jr., Chris Hemsworth, Mark Ruffalo"
+          }
+        ]
+      },
+      {
+        "tag": "534",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "p",
+            "value": "Alun perin julkaistu:"
+          },
+          {
+            "code": "c",
+            "value": "2018"
+          }
+        ]
+      },
+      {
+        "tag": "540",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Lainausoikeus"
+          }
+        ]
+      },
+      {
+        "tag": "546",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Tekstitys: suomi, ruotsi, norja, tanska, englanti, hollanti, saksa, ranska, ääniraita: monikielinen. - Kielet kannesta"
+          }
+        ]
+      },
+      {
+        "tag": "546",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Ääniraita englanti, ääniraita saksa, ääniraita ranska"
+          }
+        ]
+      },
+      {
+        "tag": "574",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Heli Uski"
+          }
+        ]
+      },
+      {
+        "tag": "599",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "BDLEVY / BDSKIVA"
+          }
+        ]
+      },
+      {
+        "tag": "600",
+        "ind1": "0",
+        "ind2": "4",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Iron man,"
+          },
+          {
+            "code": "c",
+            "value": "(fiktiivinen hahmo)"
+          }
+        ]
+      },
+      {
+        "tag": "600",
+        "ind1": "0",
+        "ind2": "4",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Thor,"
+          },
+          {
+            "code": "c",
+            "value": "(fiktiivinen hahmo)"
+          }
+        ]
+      },
+      {
+        "tag": "600",
+        "ind1": "0",
+        "ind2": "4",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Hulk,"
+          },
+          {
+            "code": "c",
+            "value": "(fiktiivinen hahmo)"
+          }
+        ]
+      },
+      {
+        "tag": "600",
+        "ind1": "0",
+        "ind2": "4",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Captain America,"
+          },
+          {
+            "code": "c",
+            "value": "(fiktiivinen hahmo)"
+          }
+        ]
+      },
+      {
+        "tag": "610",
+        "ind1": "2",
+        "ind2": "4",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Avengers"
+          }
+        ]
+      },
+      {
+        "tag": "648",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "2010-luku"
+          },
+          {
+            "code": "2",
+            "value": "ysa"
+          }
+        ]
+      },
+      {
+        "tag": "650",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "hyvän ja pahan välinen taistelu"
+          },
+          {
+            "code": "e",
+            "value": "kaunokki"
+          }
+        ]
+      },
+      {
+        "tag": "650",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "supersankarit"
+          },
+          {
+            "code": "e",
+            "value": "kaunokki"
+          }
+        ]
+      },
+      {
+        "tag": "651",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Yhdysvallat"
+          },
+          {
+            "code": "2",
+            "value": "kaunokki"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "supersankarielokuvat"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "toimintaelokuvat"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "seikkailuelokuvat"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "3D-elokuvat"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "655",
+        "ind1": " ",
+        "ind2": "7",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "elokuvat"
+          },
+          {
+            "code": "2",
+            "value": "slm/fin"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Russo, Anthony,"
+          },
+          {
+            "code": "e",
+            "value": "ohjaaja"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Russo, Joe,"
+          },
+          {
+            "code": "e",
+            "value": "ohjaaja"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Markus, Christopher,"
+          },
+          {
+            "code": "e",
+            "value": "käsikirjoittaja"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "McFleely, Stephen,"
+          },
+          {
+            "code": "e",
+            "value": "käsikirjoittaja"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Opaloch, Trent,"
+          },
+          {
+            "code": "e",
+            "value": "kuvaaja"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Feige, Kevin,"
+          },
+          {
+            "code": "e",
+            "value": "tuottaja"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Downey, Roberr Jr.,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Hemsworth, Chris,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Ruffalo, Mark,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Evans, Chris,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Johansson, Scarlett,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Cheadle, Don,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Cumberbatch, Benedict,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Holland, Tom,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Brolin, Josh,"
+          },
+          {
+            "code": "e",
+            "value": "näyttelijä"
+          }
+        ]
+      },
+      {
+        "tag": "710",
+        "ind1": "2",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Marvel Studios,"
+          },
+          {
+            "code": "e",
+            "value": "tuotantoyhtiö"
+          }
+        ]
+      },
+      {
+        "tag": "SID",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "2364754"
+          },
+          {
+            "code": "b",
+            "value": "helme"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    ]
+  }
+]
