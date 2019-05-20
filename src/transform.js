@@ -47,6 +47,35 @@ export default async function (stream) {
 	console.log("--------------------");
 	//End of custom part
 
+	const codes = new Map([
+		[/^KAB\b/i, '78.742'],
+		[/^KAF\b/i, '78.812'],
+		[/^KAG\b/i, '78.65'],
+		[/^KAH\b/i, '78.66'],
+		[/^KAK\b/i, '78.822'],
+		[/^KAP\b/i, '78.61'],
+		[/^KAR\b/i, '78.871'],
+		[/^KAS\b/i, '78.822'],
+		[/^KAT\b/i, '78.852'],
+		[/^KAV\b/i, '78.712'],
+	
+		[/^KKL\b/i, '78.3414'],
+		[/^KKM\b/i, '78.3412'],
+		[/^KKN\b/i, '78.3413'],
+		[/^KKP\b/i, '78.3414'],
+		[/^KKQ\b/i, '78.3411'],
+		[/^KKT\b/i, '78.3414'],
+		[/^KKU\b/i, '78.3414'],
+	
+		[/^KO\b/i, '78.54'],
+		[/^KOC\b/i, '78.52'],
+		[/^KOF\b/i, '78.54'],
+		[/^KOJ\b/i, '78.521'],
+		[/^KOW\b/i, '78.53'],
+	
+		[/^KW\b/i, '78.51'],
+	]);
+
 	Logger.log('debug', `Starting conversion of ${records.length} records...`);
 	return Promise.all(records.map(convertRecord));
 
@@ -55,7 +84,8 @@ export default async function (stream) {
 		let fonoMap = new Map([]);
 		let main = null;
 		let leader000 = [];
-		let leader007 = [];
+		let control007 = [];
+		let control008 = [];
 
 		record = record.replace(/\r\n$/, '') //Remove possible extra linebreaks at end of string
 		let lines = record.split(/[\r\n]+/); //Split each line to array
@@ -66,29 +96,28 @@ export default async function (stream) {
 		console.log(fonoMap)
 
 		handleLeader();
-		// handle001(); //Ok
-		// handle002(); //Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
-		// handle102and104(); //ToDo: Voyager clause not checked //This dictates how 102 is handled
-		// //handle103(); //ToDo: Yle data inconsistent with spec
-		// handle112(); //Ok
-		// handle120(); //ToDo: How data is supposed to be parsed from input?
-		// handle130(); //Ok
-		handle140();
-		// handle141(); //Ok
-		// handle150(); //ToDo: inconsistency with 505 and 245
-		// handle151();
-		// handle162();
-		// handle170();
-		// handle175();
-		handle180();
-		handle190();
-		handle191();
-		handle200();
-		handle222();
-		handle223();
-		handle224();
-		handle225();
-		handle228();
+		handle001(); //Ok
+		handle002(); //Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
+		handle102and104(); //ToDo: Voyager clause not checked //This dictates how 102 is handled
+		handle103(); //ToDo: Yle data inconsistent with spec
+		handle112(); //Ok
+		handle120(); //ToDo: How data is supposed to be parsed from input?
+		handle130(); //Ok
+		handle140(); //Need rework as specs have been updated, do 190 simultaneously
+		handle141(); //Ok
+		handle150(); //ToDo: inconsistency with 505 and 245
+		handle151();
+		handle162();
+		handle170();
+		handle175(); //Ok
+		handle180(); //Ok
+		handle190(); //Do this at the same time as 140
+		handle191(); //Do this at the same time as 190
+		handle200(); //Do this
+		handle222(); //Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
+		handle223and225(); //Ok
+		handle224(); //Ok
+		//handle228(); //NV: tätä ei enää käytetä
 		handle230();
 		handle243();
 		handle244();
@@ -140,7 +169,7 @@ export default async function (stream) {
 
 
 		function handle001() {
-			const data001 = singleExists('001')
+			const data001 = getSingle('001')
 			if(data001 === false){
 				Logger.log('error', `001 field: does not exist, or multiple fields`);
 				return;
@@ -173,7 +202,7 @@ export default async function (stream) {
 		// Seems to originate from index 8 of input: (9th char)
 		// Input "201704051PV2017"
 		function handle002() {
-			const data002 = singleExists('002')
+			const data002 = getSingle('002')
 			if(data002 === false){
 				Logger.log('error', `002 field: does not exist, or multiple fields`);
 				return;
@@ -195,9 +224,11 @@ export default async function (stream) {
 		// Huomaa, että Voyageriin viedessä viennin jälkeen on ajettu fono_relink.perl, joka korvaa emojen 035$a:n ja 
 		// poikastaen 773$w tietokannan oikealla id:llä. Jos v98* tai v81*, niin myös tämä arvo on jätetty emon 
 		// 035$a-kenttään. (v98 jätetään saapumisvalvonnan ja v81 jonkun mahdollisen Mikkelin digitointiseurantatarpeen takia.)
+
+		//isOnlineMaterial(input) <- used in new spec to detect special case
 		function handle102and104() {
-			const data102 = singleExists('102')
-			const data104 = singleExists('104')
+			const data102 = getSingle('102')
+			const data104 = getSingle('104')
 			if(data102 === false && data104 === false){
 				Logger.log('error', `102 or 104 field: does not exist, or multiple fields`);
 				return;
@@ -228,7 +259,7 @@ export default async function (stream) {
 					});
 
 					// 007/00 s, 007/01/ d, 007/03 f, 007/06 g, 007/10 m
-					leader007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'f'}, {ind: 6, val: 'g'}, {ind: 10, val: 'm'});
+					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'f'}, {ind: 6, val: 'g'}, {ind: 10, val: 'm'});
 
 					// emoon 300 ## $a 1 CD-äänilevy.
 					marcRecord.insertField({
@@ -258,7 +289,7 @@ export default async function (stream) {
 					});
 
 					// 007/00 s, 007/01 d, 007/03 b, 007/06 e, 007/10 p
-					leader007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'b'}, {ind: 6, val: 'e'}, {ind: 10, val: 'p'});
+					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'b'}, {ind: 6, val: 'e'}, {ind: 10, val: 'p'});
 
 					// emoon 300 ## $a 1 äänilevy.
 					marcRecord.insertField({
@@ -287,7 +318,7 @@ export default async function (stream) {
 					});
 
 					// 007/00 s, 007/01 d, 007/03 c, 007/06 c, 007/10 p
-					leader007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'c'}, {ind: 6, val: 'c'}, {ind: 10, val: 'p'});
+					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'c'}, {ind: 6, val: 'c'}, {ind: 10, val: 'p'});
 
 					// emoon 300 ## $a 1 äänilevy : $b 45 kierr./min.
 					marcRecord.insertField({
@@ -320,7 +351,7 @@ export default async function (stream) {
 					});
 
 					// 007/00 s, 007/01 s, 007/03 l, 007/06 j, 007/10 p + 
-					leader007.push({ind: 0, val: 's'}, {ind: 1, val: 's'}, {ind: 3, val: 'l'}, {ind: 6, val: 'j'}, {ind: 10, val: 'p'});
+					control007.push({ind: 0, val: 's'}, {ind: 1, val: 's'}, {ind: 3, val: 'l'}, {ind: 6, val: 'j'}, {ind: 10, val: 'p'});
 
 					// emoon 300 $a 1 C-kasetti.
 					if(main){
@@ -352,7 +383,7 @@ export default async function (stream) {
 					});
 
 					// 007/00 s, 007/01 d, 007/03 d, 007/06 d, 007/10
-					leader007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'd'}, {ind: 6, val: 'd'}, {ind: 10, val: '|'});
+					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'd'}, {ind: 6, val: 'd'}, {ind: 10, val: '|'});
 
 					// emoon 300 ## $a 1 äänilevy : $b 78 kierr./min.
 					if(main){
@@ -402,7 +433,7 @@ export default async function (stream) {
 				return;
 			}
 
-			const data103 = singleExists('103')
+			const data103 = getSingle('103')
 			if(data103 === false){
 				Logger.log('error', `103 field: does not exist, or multiple fields`);
 				return;
@@ -482,8 +513,8 @@ export default async function (stream) {
 
 
 		function handle112() {
-			const data112 = singleExists('112')
-			const data120 = singleExists('120')
+			const data112 = getSingle('112')
+			const data120 = getSingle('120')
 			if(data112 === false){
 				Logger.log('info', `112 field: does not exist, or multiple fields`);
 				return;
@@ -520,7 +551,7 @@ export default async function (stream) {
 		// ToDo: How data is supposed to be parsed from input?
 		// Input: 'Helsinki: Dubrovnik: We Jazz Festival 20151211 (live).'
 		function handle120() {
-			const data120 = singleExists('120')
+			const data120 = getSingle('120')
 			if(data120 === false){
 				Logger.log('info', `120 field: does not exist, or multiple fields`);
 				return;
@@ -602,7 +633,6 @@ export default async function (stream) {
 
 				// jos tekstiä ”Omistus”, ”Tässä” -> 500 ## $a sellaisenaan
 				if(line.match(/(omistus)|(tässä)/i)){
-					console.log("!!! Line match")
 					marcRecord.insertField({
 						tag: '500',
 						ind1: '',
@@ -617,8 +647,6 @@ export default async function (stream) {
 
 				// jos tekstiä ”A-puoli”, ”B-puoli” -> 505 0# $a sellaisenaan
 				if(line.match(/(a-puoli)|(b-puoli)/i)){
-					console.log("!!! Line match")
-
 					marcRecord.insertField({
 						tag: '505',
 						ind1: '0',
@@ -653,297 +681,282 @@ export default async function (stream) {
 
 		
 
+		// ToDO: Viola implementation
 		// NVOLK: nykyään nuo aukikirjoitetaan: säv. → säveltäjä jne (loppupisteen olemassaolo riippuu kontekstista)
 		// NVOLK: Huom. Fono ei kerro, onko kysessä ihminen vai yhteisötekijä (eli suomeksi tässä kontekstissa käytännössä aina yhtye). Jos nimi löytyy Violan tekijäauktoriteettitietueista, niin silloin käytetään sen mukaista tulkintaa. Muuten valistunut arvaus. (Esim. "the" tai yksisananinen tekijä indikoi yleensä yhtyettä,)
 		// NVOLK: Fonon nimiä (ja elinvuosia) verrataan Violan tekijäauktoriteettitietuiden nimiin ja salanimiin/taiteilijanimiin. Tarvittaessa Fonosta tuleva nimi vaihdetaan Violaan auktoriteettitietueen 1X0-kentän nimeen. (Esim. jos Fonon nimi löytyy vain auktoriteettitietueen 400-kentässä, niin saatetaankin käyttää auktoriteettitietueen 100-kentässä olevaa nimeä luotavassa tietueessa.)
 		// NVOLK: Lisäksi noihin luotaviin tietueisiin on takautuvassa ajossa lisätty tekijöille elinvuodet. Tän varmaan voi toteuttaa Melindassa jotenkin fiksummin.
 		// Kentästä voidaan saada myös Musiikin esityskokoonpano -tietoa kenttään 500, ja jotain Kansansävelmä-tietoa kenttään 381.
 		function handle140() {
-			const data001 = singleExists('001') //Used to search L1
-			const data170 = singleExists('170') //Used to search L1
-			const data140 = getAll('140')
+			const data001 = getSingle('001') //Used to search L1
+			const data170 = getSingle('170') //Used to search L1
+			const data140 = getAllCombined('140')
+
 			if(data140 === false){
 				Logger.log('info', `140 field: does not exist`);
 				return;
 			}
 
-			let data = '';
-			data140.forEach(function(line) {
-				data = data + line;
-			});
-
-			console.log('---------------------------------------')
 			// * henkilönnimistä pois syntymä- ja kuolinvuodet, esim. Mancini, Henry [1924-1994] (säv) -> 700 1# $a Mancini, Henry, $e säveltäjä.
-			data = data.replace(/(\[[\d\-\s]*\])/g, '');
+			let data = data140.replace(/(\[[\d\-\s]*\])/g, '');
 			// * nimen jälkeinen /pseud/ pois
 			data = data.replace(/(\/pseud\s\/)/g, '')
-			let lines = data.split(/\./).filter(n => n); //Split each person to array
 
-			let sortedSubfields = [];
-			lines.forEach(function(line, ind){
+			let persons = data.split(/\./).filter(n => n); //Split each person to array
+			let sorted700Fields = [];
+
+			persons.forEach(function(person, ind){
 				// * molemmissa Nimeämätön ja Anonyymi jätetään pois
-				if(line.match(/(nimeämätön)|(anonyymi)/i)){
+				if(person.match(/(nimeämätön)|(anonyymi)/i)){
 					return;
 				}
 
-				let sublines = line.split(/(\([^\=].*\))/).filter(n => n);
-				sublines[0] = sublines[0].replace(/(^\s+)|(\s+$)/g, '') //Remove whitespaces from start and end
-
-				if(sublines.length > 2){
-					Logger.log('error', `140 field: ppl has more than two components: ${sublines}`);
+				//Split by parenthesis, but not with pseudonym explanation
+				let elements = person.split(/(\([^\=].*\))/).filter(n => n);
+				if(elements.length > 2){
+					Logger.log('error', `140 field: ppl has more than two components: ${elements}`);
+					return;
 				}
 
+				if(elements.length === 0){
+					Logger.log('error', `140 field: ppl has no valid components: ${elements}`);
+					return;
+				}
 
-				// * jos ei suluissa olevaa funktiomerkintöä, osakenttä $e jää pois ja osakentän $a pilkku (,) muutetaan pisteeksi (.)
-				//console.log("Has comma: ", sublines[0].match(/^[^\(]+\,[^\(]+/))
-				console.log("---------")
-				let comma = sublines[0].match(/^[^\(]+\,[^\(]+/);
-				console.log(ind, sublines, " has comma: ", comma === null);
+				let name = elements[0].replace(/(^\s+)|(\s+$)/g, '') //Remove whitespaces from start and end of name
+				let comma = name.match(/^[^\(]+\,[^\(]+/);
+				let functions = null;
+				if(elements.length === 2){
+					functions = elements[1].match(/(säv)|(san)|(sov)|(esitt)/gi);
+				}
 
+				if(functions !== null){
+					functions.forEach(function(func){
+						let field = getField(func);
 
-				// Äänitteet (main)
-				// 140Beethoven, Ludwig van [1770-1827] (säv).
-				// 140Hille, Sid [1961- ] (säv).
-				if(main){
-					console.log("Main")
-					// jos Fonon 001/170:ssa L1 (=taidemusiikki), ensimmäinen nimi ->
-					// 100 1# $a nnn, nnn, $e säv.
-					if(ind === 0 && (data001.match(/L1/g) || data170.match(/L1/g))){
-						console.log("First with L1")
-						marcRecord.insertField({
-							tag: '100',
-							ind1: '1',
-							ind2: '',
-							subfields: [{
-								code: 'a',
-								value: sublines[0] + ','
-							},{
-								code: 'e',
-								value: 'säv.'
-							}]
-						});
-						return;
-					}
+						// * 700-kentät järjestykseen -> säv, san, sov, esitt (low priority)
+						if(field.tag === '700'){
+							sortArr(field);
+						}else{
+							marcRecord.insertField(field);
+						}
+					});
 
-					// muulloin kaikki nimet näin:
-					// 700 1# $a nnn, nnn, $e [funktio] (jos nimessä pilkku)
-					if(comma){
-						console.log("Otherwise with comma")
-						marcRecord.insertField({
-							tag: '700',
-							ind1: '1',
-							ind2: '',
-							subfields: [{
-								code: 'a',
-								value: sublines[0] + ','
-							},{
-								code: 'e',
-								value: sublines[1]
-							}]
-						});
-						return;
-					
-					// 710 2# $a nnn, $e [funktio] (jos nimessä ei pilkkua)
-					}else{
-						console.log("Otherwise without comma")
-						marcRecord.insertField({
-							tag: '710',
-							ind1: '1',
-							ind2: '',
-							subfields: [{
-								code: 'a',
-								value: sublines[0] + ','
-							},{
-								code: 'e',
-								value: sublines[1]
-							}]
-						});
-						return;
-					}
-
-				// Teokset
-				// Osakohteet
-				// 140Mäkelä, Maiju (säv, san).  LuoMuKanteleet (sov).
-				// 140Tolvanen, Alisa (säv).  Tolvanen, Lotta (säv).  LuoMuKanteleet (sov).
-				// 140Holly, Buddy [1936-1959].  Petty, Norman [1927-1984].
-
-				// 140Hartikainen, Nuutti (säv).  Tolvanen, Saara (säv).  LuoMuKanteleet
-				// 140(sov).
-
-				// 140Kansansävelmä /1.  Kansanlaulu, Suomi /2-3.  Raskinen, Minna (sov
-				// 140/1).  LuoMuKanteleet (sov /2-3).
-
-				// 140Malkavaara, Jarmo (säv, san /Raamattu: Psalmi 42 ja 130 mukaan).
-				// 140Bergholm, Mikael [1966- ] (sov).
-
-				// 140Solovjov-Sedoi, Vasili [1907-1979] (säv).  Matusovski, Mihail
-				// 140[1915-1990] (alkup san).  Puranen, Tuomo (sov).  Kristiina /pseud /
-				// 140(= Solanterä, Kyllikki) (san).
-
-				// 140Kansanlaulu /1,3.  Irvine, Andy (säv, san /2).  Rig ma roll (sov /1).
-				// 140Jaskari, Jaakko (sov /3).  Kyrö, Jaakko (sov /3).
 				}else{
-					console.log("Sub")
-					if(ind === 0){
-						console.log("First")
-						if(comma){
-							console.log("With comma")
-							// 100 1# $a nnn, nnn, $e säv. (1. nimi, jos nimessä pilkku)
-							marcRecord.insertField({
+					marcRecord.insertField(getField());
+				}
+				
+				function getField(func){
+					let subfields = null;
+					// * jos ei suluissa olevaa funktiomerkintöä, osakenttä $e jää pois ja osakentän $a pilkku (,) muutetaan pisteeksi (.)
+					if(typeof(func) === 'undefined'){
+						subfields = [{
+							code: 'a',
+							value: name + '.'
+						}];
+					}else{
+						subfields = [{
+							code: 'a',
+							value: name + ','
+						},{
+							code: 'e',
+							value: func
+						}];
+					}
+
+					// Äänitteet (main)
+					if(main){
+						// jos Fonon 001/170:ssa L1 (=taidemusiikki), ensimmäinen nimi ->
+						// 100 1# $a nnn, nnn, $e säv.
+						if(ind === 0 && (data001 && data001.match(/L1/g)) || (data001 && data170.match(/L1/g))){
+							return {
 								tag: '100',
 								ind1: '1',
 								ind2: '',
 								subfields: [{
 									code: 'a',
-									value: sublines[0] + ','
+									value: name + ','
 								},{
 									code: 'e',
 									value: 'säv.'
 								}]
-							});
+							};
+						}
+	
+						// muulloin kaikki nimet näin:
+						// 700 1# $a nnn, nnn, $e [funktio] (jos nimessä pilkku)
+						if(comma){
+							return{
+								tag: '700',
+								ind1: '1',
+								ind2: '',
+								subfields: subfields
+							};
+	
+						// 710 2# $a nnn, $e [funktio] (jos nimessä ei pilkkua)
 						}else{
-							console.log("Without comma")
-							// 110 2# $a nnn, $e säv. (1. nimi, jos nimessä ei pilkkua)
-							marcRecord.insertField({
-								tag: '110',
+							return {
+								tag: '710',
+								ind1: '1',
+								ind2: '',
+								subfields: subfields
+							};
+						}
+	
+					// Teokset / Osakohteet
+					}else{
+						if(ind === 0){
+							if(comma){
+								// 100 1# $a nnn, nnn, $e säv. (1. nimi, jos nimessä pilkku)
+								return{
+									tag: '100',
+									ind1: '1',
+									ind2: '',
+									subfields: [{
+										code: 'a',
+										value: name + ','
+									},{
+										code: 'e',
+										value: 'säv.'
+									}]
+								};
+							}else{
+								// 110 2# $a nnn, $e säv. (1. nimi, jos nimessä ei pilkkua)
+								return {
+									tag: '110',
+									ind1: '2',
+									ind2: '',
+									subfields: [{
+										code: 'a',
+										value: name + ','
+									},{
+										code: 'e',
+										value: 'säv.'
+									}]
+								};
+							}
+						}
+	
+						if(comma){
+							// 700 1# $a nnn, nnn, $e [funktio] (1. nimen muut funktiot + muut nimet, jos pilkku)
+							return {
+								tag: '700',
+								ind1: '1',
+								ind2: '',
+								subfields: subfields
+							};
+	
+						}else{
+							// 710 2# $a nnn, $e [funktio] (1. nimen muut funktiot + muut nimet, jos ei pilkkua)
+							return {
+								tag: '710',
 								ind1: '2',
 								ind2: '',
-								subfields: [{
-									code: 'a',
-									value: sublines[0] + ','
-								},{
-									code: 'e',
-									value: 'säv.'
-								}]
-							});
-						}
-
-						if(sublines.length > 2){
-							console.log(sublines[1])
-
-							sublines.splice(1,1)
-						}else{
-							console.log("No more functions to process in first.")
-							return;
+								subfields: subfields
+							};
 						}
 					}
+				}
+							
+				function sortArr(field){
+					var orderArr = [/säv/i, /san/i, /sov/i, /esitt/i];
 
-					console.log("Rest")
-					console.log(sublines)
-					
-					if(sublines.length > 1){
-						let person = sublines.shift();
+					if (sorted700Fields.length >= 1) {
+						var indexInserted = orderArr.findIndex(a => field.subfields[1].value.match(a))
+						var indexPos = 0;
 
-						lines.forEach(function(func){
-							if(comma){
-								// 700 1# $a nnn, nnn, $e [funktio] (1. nimen muut funktiot + muut nimet, jos pilkku)
-								console.log("Handle rest of functions: ", sublines[1])
-	
-	
-							}else{
-		
-								// 710 2# $a nnn, $e [funktio] (1. nimen muut funktiot + muut nimet, jos ei pilkkua)
-								console.log("Handle rest of functions: ", sublines[1])
+						sorted700Fields.forEach(element => {
+							if (orderArr.findIndex(a => element.subfields[1].value.match(a)) <= indexInserted) {
+								indexPos++;
 							}
 						});
+
+						sorted700Fields.splice(indexPos, 0, field);
+					} else {
+						sorted700Fields.push(field);
 					}
-
-
-					// * 700-kentät järjestykseen -> säv, san, sov, esitt (low priority)
-					function sortArr(){
-						//order [säv, san, sov, esitt]
-
-						var orderArr = [/säv/i, /san/i, /sov/i, /esitt/i];
-						if(sublines.length > 1){
-							console.log("Index in order array: ", orderArr, " is: ", orderArr.findIndex(a => sublines[1].match(a)));
-						}
-
-						if (sublines.length > 1) {
-							var indexInserted = orderArr.findIndex(a => sublines[1].match(a))
-							var indexPos = 0;
-	
-							sortedSubfields.forEach(element => {
-								if (orderArr.findIndex(a => sublines[1].match(element)) <= indexInserted) {
-									indexPos++;
-								}
-							});
-	
-							foundRec.subfields.splice(indexPos, 0, {
-								code: 'a',
-								value: element
-							});
-						} else {
-							foundRec.subfields.push({
-								code: conf.marcSub,
-								value: valueFixing(conf, field)
-							});
-						}
-					}
-					
 				}
 			})
-			console.log("--------------------")
-			console.log("Insert sorted subfields: ", sortedSubfields);
+			
+			//Finally insert sorted fields
+			if(sorted700Fields.length > 0){
+				sorted700Fields.forEach(function(field){
+					marcRecord.insertField(field)
+				})
+			}
 		}
 
 
 		function handle141() {
-			const data141 = getAll('141')
+			const data141 = getAllCombined('141')
 			if(data141 === false){
 				Logger.log('info', `Invalid 141 field: does not exist`);
 				return;
 			}
 
 			// 500 ## $a etutekstillä: Tekijähuomautus:
-			data141.forEach(function(line) {
-				marcRecord.insertField({
-					tag: '500',
-					ind1: '',
-					ind2: '',
-					subfields:[{
-						code: 'a',
-						value: 'Tekijähuomautus: ' + line
-					}]
-				});
+			marcRecord.insertField({
+				tag: '500',
+				ind1: '',
+				ind2: '',
+				subfields:[{
+					code: 'a',
+					value: 'Tekijähuomautus: ' + data141
+				}]
 			});
 		}
 
 
-		// Osakohteet
-		// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
-		// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
-		// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
 
-		// Emot
-		// ensimmäinen rivi -> 245 10 $a – ks. Artikkeleiden ohitus
-		// lisätään aina 245 $a-kentän jälkeen $h [Äänite]
-		// muut rivit: jos sulkeet ja lopussa viiva (-) -> 031 ## $t, sulkeet ja loppuviiva pois
 
-		// jos sulkeet ja yhtäläisyysmerkki (=) -> = 245 $b, sulkeet ja = pois
-		// jos sulkeet ilman = ja - -> 500 ## $a, sulkeet pois, iso alkukirjain
 
+		// *********************
 		// tark. taidemusiikin moniriviset nimekkeet! esim.:
+		// Näin:
 		// ensimmäinen 150-rivi 245 $a, muut kaksoispisteen jälkeen kenttään 245 $b.
 		// 1501, 1502 jne. kenttään
 		// 505 0# $a Osat: 15001-rivin teksti ; 15002-rivin teksti ; 15003-rivin teksti ; 15004-rivin teksti.
+		// *********************
 
 		// ToDo: inconsistency with 505 and 245
 		function handle150() {
-			let data150 = getAll('150')
+			let data150 = getAllCombined('150')
 			if(data150 === false){
 				Logger.log('info', `Invalid 150 field: does not exist`);
 				return;
 			}
 
+			console.log("-------------------------")
+			console.log(data150)
+
+			// Emot
+			// ensimmäinen rivi -> 245 10 $a – ks. Artikkeleiden ohitus
+			// Artikkelit pilkulla erotettuna nimekkeen perässä, konvertoidaan nimekkeen alkuun – esim. 150Old rugged cross, The -> 245 14 $a The old rugged cross
+			// NV: Tässä voidaan olla 130->245-kohtaa liberaalimpia: jos lopussa pilkku ja näyttää artikkelilta, niin siirretään artikkeli ja asetetaan 245 ind2 siirretyn merkkijonon pituuden perusteella (+1).
+
+			// lisätään aina 245 $a-kentän jälkeen $h [Äänite]
+			// muut rivit: jos sulkeet ja lopussa viiva (-) -> 031 ## $t, sulkeet ja loppuviiva pois
+
+			// jos sulkeet ja yhtäläisyysmerkki (=) -> = 245 $b, sulkeet ja = pois
+			// jos sulkeet ilman = ja - -> 500 ## $a, sulkeet pois, iso alkukirjain
 			if(main){
 
 
+			// Osakohteet
+			// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
+			// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
+			// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
 			}else{
 				
 			}
 
 			//Emot:
-			//150Moorland elegies, sarja sekakuorolle ja jousiorkesterille.
+			// 150Moorland elegies, sarja sekakuorolle ja jousiorkesterille.
+			// 150Walkuere, Die (Valkyyria), ooppera: 1. näytös kokonaan.
+
+			// 150Tuntematon sotilas
+			// 150elokuva (Suomi 2017); ohjaaja: Louhimies, Aku (soundtrack).
+
 
 			// Teoksia:
 			// 150Rocktown special
@@ -977,7 +990,7 @@ export default async function (stream) {
 			// 1502. Slängpolska efter Juringius.
 
 			// 500 ## $a etutekstillä: Tekijähuomautus:
-			data150.forEach(function(line) {
+			// data150.forEach(function(line) {
 				//console.log("Line: ", line); 
 
 				// marcRecord.insertField({
@@ -989,49 +1002,194 @@ export default async function (stream) {
 				// 		value: 'Tekijähuomautus: ' + line
 				// 	}]
 				// });
+			// });
+
+		}
+
+
+		// Aanitteet / Emot
+		// 151Mun miehen katse.  Rakastan sua yhtä paljon.  Venetsialainen ilta.
+		// 151Sulje silmäni suudelmin.  Lemmen tuulet.  Tanssiva liekki.  Mun sanat
+		// 151totta om.  Pidän susta huolta.  Tunteet palaa sielu särkyy.  Onnen
+		// 151maailmaan.  Naisen vaistot.  Rakkauden yö.
+
+		// Teokset / Osakohteet
+		// 151Tilausteos: Kalamazoo symphony orchestra ja Gilmore keyboard
+		// 151festival.
+
+		// 151Innoittaja: Södergran, Edith: Animalisk hymn, runo (kirjallisuus)
+
+		// 151Säveltäjä tehnyt kuorosovituksen sävelrunostaan Finlandia, op.26
+		// 151orkesterille v:lta 1900.
+		function handle151() {
+			const data151 = getAllCombined('151');
+			if(data151 === false){
+				Logger.log('info', `Invalid 151 field: does not exist`);
+				return;
+			}
+
+			// Emot
+			// 505 0_ $a xxxx ; xxxx ; xxxx.
+			// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
+			// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
+			// ToDo: jos kenttä on jo muodostettu 150-kentästä, tämä sen jatkoksi – harvinaista
+			if(main){
+				let data = data151.replace(/\.\s{2}/g, ' ; ');
+				data = data.replace(/\.$/, '');
+				marcRecord.insertField({
+					tag: '505',
+					ind1: '',
+					ind2: '',
+					subfields:[{
+						code: 'a',
+						value: data
+					}]
+				});
+			// Osakohteet
+			// 500 ## $a sellaisenaan
+			}else{
+				marcRecord.insertField({
+					tag: '500',
+					ind1: '',
+					ind2: '',
+					subfields:[{
+						code: 'a',
+						value: data151
+					}]
+				});
+			}
+		}
+
+
+		// 162SV1932
+		// 162SV1902 valm
+		// 162SV1684 julk
+		// 162SV1743 noin
+		// 162SV2016 ensi
+		// 162SV1900 uud
+		// 162SV1903 ork
+		// 162SV2016 sov
+		//1 62SV1500-luku
+		function handle162() {
+			const data162 = getSingle('162')
+			if(data162 === false){
+				Logger.log('info', `162 field: does not exist, or multiple fields`);
+				return;
+			}
+
+			// 045 0# $b d + yyyy
+			// esim. d1998
+			let year = data162.match(/\d{4}/)
+
+			// These are regex from previous solution: (some capture group filtering missing)
+			// https://github.com/NatLibFi/viola-scripts/blob/master/scripts/fono/fono_to_marc.pl
+			// console.log("first: ", data162.match(/^[^0-9?]?[^0-9?]?([0-9?]{1,4}.+)$/))
+			// console.log("second: ", temp[0].match(/^.*?\b(?:SV)?([12][0-9?]{1,3}).*$/i))
+			if(year.length === 1){
+				marcRecord.insertField({
+					tag: '045',
+					ind1: '0',
+					ind2: '',
+					subfields:[{
+						code: 'a',
+						value: 'd' + year
+					}]
+				});
+			}else{
+				Logger.log('warn', `162 field: multiple matches or no match ${year}`);
+			}
+		}
+
+
+		// 084 ## $a nnn $2 ykl ja/tai 008/18-19 Ks. lajikoodit_korjattu.txt
+		// Input: "L4 L4A"
+		// 170L4A L6B
+		// 170L4A
+		// 170L5A
+		// 170L6D L3X
+		function handle170() {
+			const data170 = getSingle('170')
+			if(data170 === false){
+				Logger.log('info', `170 field: does not exist, or multiple fields`);
+				return;
+			}
+
+			let code = getGenre(data170)
+
+			// 084 ## $a nnn $2 ykl			
+			marcRecord.insertField({
+				tag: '084',
+				ind1: '',
+				ind2: '',
+				subfields:[{
+					code: 'a',
+					value: code
+				},{
+					code: '2',
+					value: 'ykl'
+				}]
 			});
 
+			// 008/18-19
+			if( code.length === 2 ){
+				control008.push({ind: 18, val: code[0]},{ind: 19, val: code[1]});
+			}else{
+				Logger.log('error', `170 field: invalid genre code returned: ${code}`);
+			}
 		}
 
 
-		// Emot
-		// 505 0_ $a xxxx ; xxxx ; xxxx.
-		// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
-		// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
-		// jos kenttä on jo muodostettu 150-kentästä, tämä sen jatkoksi – harvinaista
-
-		// Osakohteet
-		// 500 ## $a sellaisenaan
-
-		// Input: "Queen of hell.  665.  Foes to fire.  Rise of the deth."
-		function handle151() {
-
-		}
-
-
-		// ToDo: Ei esimerkkitietueessa
-		function handle162() {
-
-		}
-
-
-		//084 ## $a nnn $2 ykl ja/tai 008/18-19 Ks. lajikoodit_korjattu.txt
-
-		// Input: "L4 L4A"
-		function handle170() {
-
-		}
-
-
-		// ToDo: Ei esimerkkitietueessa
+		// 175heavy: death metal: melodic death
+		// 175punk
 		function handle175() {
+			const data175 = getSingle('175')
+			if(data175 === false){
+				Logger.log('info', `175 field: does not exist, or multiple fields`);
+				return;
+			}
 
+			console.log("Data175: ", data175)
+			let data = data175[0].toUpperCase() + data175.slice(1);
+
+			if(!data.match(/[.!]$/)){
+				data = data + '.';
+			}
+
+			// 500 ## $a [Iso alkukirjain], loppuun piste
+			marcRecord.insertField({
+				tag: '500',
+				ind1: '',
+				ind2: '',
+				subfields:[{
+					code: 'a',
+					value: data
+				}]
+			});
 		}
 		
 
-		// ToDo: Ei esimerkkitietueessa
 		function handle180() {
+			const data180 = getSingle('180')
+			if(data180 === false){
+				Logger.log('info', `180 field: does not exist, or multiple fields`);
+				return;
+			}
 
+			let data = '';
+			if(!data180.match(/[.!]$/)){
+				data = data180 + '.';
+			}
+
+			// 500 ## $a etutekstillä Aihepiiri:, loppuun piste
+			marcRecord.insertField({
+				tag: '500',
+				ind1: '',
+				ind2: '',
+				subfields:[{
+					code: 'a',
+					value: 'Aihepiiri:' + data
+				}]
+			});
 		}
 
 
@@ -1050,94 +1208,404 @@ export default async function (stream) {
 		// ks. Artikkelien ohitus
 
 		// Input: "Iron Magazine (yhtye)."
+		
+		//Äänitteet
+		// 190Maksetut viulut (yhtye).
+		// 190Kalatie, Heli (piano).  Lampi, Venla (piano).  Ym.
+		// 190Black Magic Six (yhtye).
+		// 190Saartamo, Venla (laulu, yhtye).
+
+		// 190Suomen Rauhanyhdistysten Keskusyhdistyksen (SRK:n) kuoro (kuoro).
+		// 190Heikkilä, Olli (kuoronjohtaja).  Kallunki, Lauri-Kalle (urut).
+		// 190Soranta, Juha (cembalo).
+
+		// 190Tuomari Nurmio (laulu, kitara, yhtye).
+		// 190(Dumari ja Spuget).
+
+		// 190Sydänmäki, Jussi (laulu).  Louhivuori, Janne (kitara, ym).
+		// 190(Jussi Sydänmäki ja Janne Louhivuori /yhteinen yhtye).
+
+		// 190Pennanen, Keijo (kitara).  Korpela, Jukka (bassokitara).  Dominis,
+		// 190Rob (piano ja/tai: kosketinsoittimet).  Karvonen, Jari-Pekka 'Jartsa'
+		// 190(rummut ja/tai: lyömäsoittimet).
+
+		// Teos
+		// 190Jarnos, The (yhtye).
+		// 190Roponen, Jussi (laulu, yhtye).
+		// 190Syrjänen, Saxman (saksofoni).  Gustavson, Jukka (sähköurut,
+		// 190HeviSaurus (yhtye).
+		// 190Alanko, Ismo (laulu, piano).
+
+		// 190Syrjänen, Saxman (saksofoni).  Gustavson, Jukka (sähköurut,
+		// 190kosketinsoittimet).
+		// 190(Saxman Syrjänen ja Jukka Gustavson Mojomen /yhteinen yhtye).
+
 		function handle190() {
+			const data190 = getAllCombined('190')
+
+			if(data190 === false){
+				Logger.log('info', `190 field: does not exist`);
+				return;
+			}
+
 
 		}
 
-		// samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
-		// POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
+
 
 		// Input: "syntetisaattori)."
+		//Äänitteet
+		// 191Ym.
+		// 191Yhtyeen muut jäsenet lueteltu oheislehtisessä.
+		// 191Sekä: Puljula, Sara (kontrabasso).  Kettunen, Jari 'Kepa' (rummut).
+
+		// 191Muut jäsenet: Rauhala, Ville (kontrabasso).  Heikinheimo, Ilmari
+		// 191(rummut ja/tai: lyömäsoittimet).
+
+		// 191Godzinsky, George de (johtaja /01-11,15-18).  Radion viihdeorkesteri
+		// 191(Helsinki) (orkesteri /01-11,15-18).  Salo, Jaakko (johtaja /12-14).
+		// 191Studio-orkesteri (orkesteri /12-14).  Radiokuoro (kuoro /06).
+		// 191Kinnunen, Laila (laulu /07).  Mustonen, Ritva (laulu /07).
+		// 191Koskimies, Pentti (piano /19-21).  Englund, Ingmar (kitara /19-21).
+		// 191Helistö, Paavo (klarinetti /19-21).  Helenius, Mikko (piano,
+		// 191harmonikka: bandoneon, vihellys /22).
+
+		//Teos
+		// 191Yhtyeen jäsenet lueteltu esittelylehtisessä.
+		// 191Orkesterin jäsenet lueteltu tekstilehtisessä.
+		// 191Yhtyeen jäsenet ja avustajat lueteltu oheistiedoissa.
+		// 191Yhtyeen jäsenet lueteltu yleistietodokumentissa ja oheistiedoissa.
+
 		function handle191() {
+			const data191 = getAllCombined('191')
 
+			if(data191 === false){
+				Logger.log('info', `191 field: does not exist`);
+				return;
+			}
+
+			// POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
+			if(data191.match(/\byleistietodoku/i)){
+				return;
+			}
+
+			// samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
 		}
 
 
-		// 008/35-37 + 041 ## $d ks. ylekoodit
-		// Input: "englanti"
 		function handle200() {
+			const data200 = getSingle('200')
+			if(data200 === false){
+				Logger.log('info', `200 field: does not exist, or multiple fields`);
+				return;
+			}
 
+			// 008/35-37 + 041 ## $d ks. ylekoodit
+			// Artturi: laita 041, 008 tyhjää -> validaattori lisää 008:n koodin 041:n perusteella.
+			marcRecord.insertField({
+				tag: '500',
+				ind1: '',
+				ind2: '',
+				subfields:[{
+					code: 'a',
+					value: 'Aihepiiri:' + data200
+				}]
+			});
 		}
 
-	
-		// Emot
-		// 008/07-10 yyyy + 260 ## $c pyyyy. – jos ei kenttää 224
-		
-		// Osakohteet
-		// 008/07-10 yyyy + 773 $d pyyyy – jos ei kenttää 224
-		// jos on 224: 534 ## $p Alun perin julkaistu: $c pyyyy.
 
-		// Input: "PV2017"
 		function handle222() {
+			const data222 = getSingle('222')
+			if(data222 === false){
+				Logger.log('error', `222 field: does not exist, or multiple fields`);
+				return;
+			}
 
+			let year = data222.match(/(?:PV)?(\d{4})/);
+
+			if(year === null){
+				Logger.log('error', `222 field: no valid year found from '${data222}'`);
+				return;
+			}
+
+			if(main){
+				// Emot
+				// 008/07-10 yyyy + 260 ## $c pyyyy. – jos ei kenttää 224
+				if(!exists(224)){
+					marcRecord.insertField({
+						tag: '260',
+						ind1: '',
+						ind2: '',
+						subfields:[{
+							code: 'c',
+							value: 'p' + year[1]
+						}]
+					});
+				}
+
+				if(!insertToControl008(7, 4, year[1])){
+					Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
+				}
+			}else{
+				// Osakohteet
+				// 008/07-10 yyyy + 773 $d pyyyy – jos ei kenttää 224
+				if(!exists(224)){
+					marcRecord.insertField({
+						tag: '773',
+						ind1: '',
+						ind2: '',
+						subfields:[{
+							code: 'd',
+							value: 'p' + year[1]
+						}]
+					});
+
+					if(!insertToControl008(7, 4, year[1])){
+						Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
+					}
+				}else{
+					// jos on 224: 534 ## $p Alun perin julkaistu: $c pyyyy.
+					marcRecord.insertField({
+						tag: '534',
+						ind1: '',
+						ind2: '',
+						subfields:[{
+							code: 'p',
+							value: 'Alun perin julkaistu:' + year[1]
+						},{
+							code: 'c',
+							value: 'p' + year[1]
+						}]
+					});
+				}
+			}
+			console.log(control008)
 		}
 
 
-		// 008/15-17 – jos ei kenttää 225 ks. ylekoodit
+		function handle223and225() {
+			let matches = null;
+			//From 225: 008/15-17 ks. ylekoodit
+			if(exists(225)){
+				const data225 = getSingle('225')
+				if(data225 === false){
+					Logger.log('info', `225 field: does not exist, or multiple fields`);
+					return;
+				}
 
-		// Input: "PM1000"
-		function handle223() {
+				matches = data225.match(/(?:RM)?(\d{4})/);
 
+			// From 223: 008/15-17 – jos ei kenttää 225 ks. ylekoodit
+			}else{
+				const data223 = getSingle('223')
+				if(data223 === false){
+					Logger.log('info', `223 field: does not exist, or multiple fields`);
+					return;
+				}
+
+				matches = data223.match(/(?:PM)?(\d{4})/);
+			}
+
+			if(matches){
+				let countryCode = getPubCountry(matches[1]);
+				if(!insertToControl008(15, 3, countryCode)){
+					let field = '223';
+					if(exists(225)){
+						field = '225'
+					}
+					Logger.log('error', `223 field: failed to insert to control from '${field}', transformed to:' ${countryCode}'`);
+				}
+			}
 		}
 
 
-		// ToDo: Ei esimerkkitietueessa
-		function handle224() {
+		function handle224() {	
+			const data224 = getSingle('224')
+			if(data224 === false){
+				Logger.log('info', `224 field: does not exist, or multiple fields`);
+				return;
+			}
 
-		}
+			let matches = data224.match(/(?:RV)?(\d{4})/);
+			if(matches){
+				let year = matches[1];
 
+				// emot: 008/07-10 yyyy + 264 ## $c pyyyy.
+				if(main){
+					marcRecord.insertField({
+						tag: '264',
+						ind1: '',
+						ind2: '',
+						subfields:[{
+							code: 'c',
+							value: 'p' + year
+						}]
+					});
 
-		// ToDo: Ei esimerkkitietueessa
-		function handle225() {
-
+				// osakohteet: 008/07-10 yyyy + 773 $d pyyyy
+				}else{
+					marcRecord.insertField({
+						tag: '773',
+						ind1: '',
+						ind2: '',
+						subfields:[{
+							code: 'd',
+							value: 'p' + year
+						}]
+					});
+				}
+	
+				if(!insertToControl008(7, 4, year)){
+					Logger.log('error', `224 field: failed to insert to control from '${data224}', transformed to:' ${year}'`);
+				}
+			}
+			console.log(control008)
 		}
 
 
 		// 008/07-10 yyyy + 260 ## $c [yyyy?] – jos ei kenttiä 222 tai 224
+		//NV: tätä ei enää käytetä
 		// Input: "HV2017"
-		function handle228() {
+		// function handle228() {
+		// }
 
-		}
+
+		// 230KHY Suomen Musiikki / KHYVINYYLI 090
+		// 230Ektro / KRYPT 112
+		// 230Luova / Ei kataloginumeroa
+		// 230Warner / 190295794224
+
+		// 230We Jazz / WJLP 02
+		// 230WJLP02
+
+		// 230Bafe's Factory / MBA 016
+		// 230Nordic Notes / NN096
+		// 230MBA016, NN096
+
+		// 230Virgin EMI (Universal) / 006025 5760725 3
+		// 23000602557607253
+
+		// 230Solina / SOL 068
+		// 230SOL068
 
 
-		// jos 2 riviä -> vain 1., jos 3 riviä -> 1. ja 2. molemmista omat 028-kentät
-		// emot: 028 01 $b levymerkki $a tuotetunnus (lisätieto) - tuotetunnuksesta pois tyhjämerkit
-		// Ei konvertoida: ”Ei kaupallista tunnusta”, ”Ei tilausnumeroa”
-		// Input: "KRYPT112"
+		// Lisätiedosta saadaan mahdollisesti apuja kentän käsittelyyn
 		function handle230() {
+			const data230 = getAll('230')
+			if(data230 === false){
+				Logger.log('info', `230 field: does not exist, or multiple fields`);
+				return;
+			}
 
-		}
+			if(data230.length >= 4){
+				Logger.log('warn', `230 field: 4 or more lines, not specced.`);
+			}
 
-
-		// ToDo: Ei esimerkkitietueessa
-		function handle243() {
-
-		}
+			// jos 2 riviä -> vain 1., jos 3 riviä -> 1. ja 2. molemmista omat 028-kentät
+			if(data230.length === 2 || data230.length === 3){
+				data230.pop();
+			}
 
 			
-		// emot:
-		// 008/24 z + 500 ## $a sellaisenaan
+			// emot: 028 01 $b levymerkki $a tuotetunnus (lisätieto) - tuotetunnuksesta pois tyhjämerkit
+			if(!main){
+				console.log("-------- 230 --------")
+				console.log("data: ", data230);
 
-		// osakohteet:
-		// vain 008/24 z, ei 500-kenttää
+				data230.every(function(line) {
+					// Ei konvertoida: ”Ei kaupallista tunnusta”, ”Ei tilausnumeroa”
+					if(line.match(/(Ei kaupallista tunnusta)|(Ei tilausnumeroa)/)){
+						return true;
+					}					
+					
+					let elements = line.split(/\s\/\s/);
+					// levymerkki / tuotetunnus
+					// levymerkki / tuotetunnus / (lisätieto)
 
-		// Input: "Tekstilehtinen."
-		function handle244() {
+					if(elements.length === 2){
+						elements[1] = elements[1].replace(/\s/, '');
+						marcRecord.insertField({
+							tag: '028',
+							ind1: '0',
+							ind2: '1',
+							subfields:[{
+								code: 'b',
+								value: elements[0]
+							},{
+								code: 'a',
+								value: elements[1]
+							}]
+						});
+					}else{
+						Logger.log('warn', `230 field: insertion failed, not two elements`);
+					}
 
+					return true;
+				});
+			}
 		}
 
 
-		function singleExists(ind){
+		function handle243() {
+			if(!main){
+				const data243 = getSingle('243')
+				if(data243 === false){
+					Logger.log('info', `243 field: does not exist, or multiple fields`);
+					return;
+				}
+	
+				// vain teokset, 12-merkkinen koodi	024 0# $a, kukin numero uuteen kenttään
+				marcRecord.insertField({
+					tag: '024',
+					ind1: '0',
+					ind2: '',
+					subfields:[{
+						code: 'a',
+						value: data243
+					}]
+				});
+			}
+		}
+
+
+		function handle244() {
+			const data244 = getAllCombined('244');
+
+			if(data244 === false){
+				Logger.log('info', `244 field: does not exist`);
+				return;
+			}
+
+			// osakohteet:
+			// vain 008/24 z, ei 500-kenttää
+			if(!insertToControl008(24, 1, 'z')){
+				Logger.log('error', `244 field: failed to insert to control from '${data244}'`);
+			}
+
+			// emot:
+			// 008/24 z + 500 ## $a sellaisenaan
+			if(main){
+				marcRecord.insertField({
+					tag: '500',
+					ind1: '',
+					ind2: '',
+					subfields:[{
+						code: 'a',
+						value: data244
+					}]
+				});
+			}
+		}
+
+
+		function exists(ind){
+			if(fonoMap.has(ind)){
+				return true;
+			}
+			return false;
+		}
+
+		function getSingle(ind){
 			if(fonoMap.has(ind)){
 				let data = fonoMap.get(ind);
 				if(data.length === 1){
@@ -1156,6 +1624,194 @@ export default async function (stream) {
 		}
 
 
+		function getAllCombined(ind){
+			const dataAll = getAll(ind);
+			if(dataAll){
+				let data = '';
+				dataAll.forEach(function(line) {
+					if(line.match(/^\s/) || data.match(/\s$/)){
+						data = data + line;
+					}else{
+						data = data + ' '  + line;
+					}
+				});
+				return data;
+			}else{
+				return dataAll;
+			}
+		}
+
+
+		function getGenre(data){
+			switch(true){
+				//[/^L1A\b/ && do { $mr->insert_fields_ordered(MARC::Field->new('084', '', '', a => '78.35', 2 => 'ykl')], 
+				case /^L1B\b/.test(data):
+				return 'pt'; 
+				case /^L1C\b/.test(data): //$mr->insert_fields_ordered(MARC::Field->new('084', '', '', a => '78.32', 2 => 'ykl')], 
+				return 'sg'; 
+				case /^L1L\b/.test(data):// 22
+				return 'j'; 
+			
+				case /^L2\b/.test(data):
+				case /^L2A\b/.test(data):
+				case /^L2B\b/.test(data):
+				case /^L2BB\b/.test(data):
+				case /^L2L\b/.test(data): //marc_set_pos($m008, 22,  'j'; 
+				case /^L2N\b/.test(data):
+				return 'gm'; 
+			
+				case /^L3\b/.test(data):
+				case /^L3A\b/.test(data):
+				case /^L3L\b/.test(data): //marc_set_pos($m008, 22,  'j'; 
+				case /^L3U\b/.test(data):
+				case /^L3X\b/.test(data):
+				return 'fm'; 
+
+				case /^L4\b/.test(data):
+				case /^L4A\b/.test(data):
+				case /^L4AA\b/.test(data):
+				return 'rc';
+
+				case /^L4L\b/ .test(data): //marc_set_pos($m008, 22,  'j';
+				return 'rc';  
+		
+				case /^L5A\b/.test(data):
+				case /^L5AA\b/.test(data):
+				return 'jz'; 
+				case /^L5B\b/.test(data):
+				return 'bl'; 
+				case /^L5L\b/.test(data): // 22
+				return 'j';
+			
+				case /^L6T\b/.test(data):
+				return 'df'; 
+				case /^L6B\b/.test(data):
+				return 'cy'; 
+				case /^L6\b/.test(data):
+				case /^L6C\b/.test(data): 
+				case /^L6D\b/.test(data):
+				case /^L6L\b/.test(data): //marc_set_pos($m008, 22,  'j'; 
+				case /^L6V\b/.test(data):
+				case /^L6X\b/.test(data):
+				return 'pp'; 
+			
+				case /^L9E\b/.test(data):
+				return 'mp';
+			}
+			Logger.log('warn', `getGenre(): genre code ${data} not identified`);
+			return '  ';
+		}
+
+		function getPubCountry(input){
+			switch(input){
+				case '1000': //Suomi
+				case '1100': //Uusimaa
+				case '1200': //Ahvenanmaa
+				case '1300': //Varsinais-Suomi
+				case '1400': //Satakunta ja Häme
+				case '1410': //Satakunta
+				case '1420': //Pirkanmaa
+				case '1430': //Etelä-Häme
+				case '1440': //Keski-Suomi
+				case '1500': //Kymenlaakso
+				case '1600': //Savo
+				case '1610': //Etelä-Savo
+				case '1620': //Pohjois-Savo
+				case '1700': //Karjala
+				case '1710': //Etelä-Karjala
+				case '1720': //Pohjois-Karjala
+				case '1800': //Pohjanmaa
+				case '1810': //Etelä-Pohjanmaa
+				case '1820': //Keski-Pohjanmaa
+				case '1830': //Pohjois-Pohjanmaa
+				case '1831': //Koillismaa
+				case '1840': //Kainuu
+				case '1850': //Peräpohjola
+				case '1900': //Lappi
+				return 'fi';
+
+				//case '2000 => '' //Skandinavia
+				case '2100': //Ruotsi
+				return 'sw'
+				case '2200': //Norja
+				return 'no'
+				case '2300': //Tanska
+				return 'dk'
+				case '2380': //Färsaaret
+				return 'dk'
+				case '2390': //Grönlanti
+				return 'dk'
+				case '2400': //Islanti
+				return 'ic'
+
+				//case: '3000': '' //Eurooppa
+				case '3100': //Iso-Britannia ja Irlanti
+				case '3110': //Englanti (ja Kanaalin ym. Saaret)
+				case '3120': //Wales
+				case '3130': //Skotlanti
+				case '3140': //Pohjois-Irlanti
+				return 'xxk'
+				case '3180':
+				return 'ie' //Irlanti (tasavalta)
+				case '3200':
+				return 'gw' //Saksa
+				case '3310':
+				return 'sz' //Sveitsi
+				case '3330':
+				return 'au' //Itävalta
+				case '3410':
+				return 'be' //Belgia
+				case '3420':
+				return 'ne' //Alankomaat
+				case '3430':
+				return 'lu' //Luxemburg
+				case '3500':
+				return 'fr' //Ranska
+				case '3590':
+				return 'mc' //Monaco
+				case '3610':
+				return 'sp' //Espanja
+				case '3670':
+				return 'po' //Portugali
+				case '3710':
+				return 'it' //Italia
+				case '5100':
+				return 'ru' //Venäjä
+				case '5210':
+				return 'er' //Viro
+				case '5220':
+				return 'lv' //Latvia
+				case '5230':
+				return 'li' //Liettua
+				case '5300':
+				return 'bw' //Valkovenäjä
+				case '5400':
+				return 'un' //Ukraina
+				case '5500':
+				return 'mv' //Moldova
+				case '5600':
+				return 'ai' //Armenia
+				case '5800':
+				return 'gs' //Georgia
+				case '7110':
+				return 'xxc' //'Kanada
+				case '7120':
+				return 'xxu' //'Yhdysvallat
+				case '7130':
+				return 'mx' //Meksiko
+			}
+		}
+
+
+		function isOnlineMaterial(input) {
+			const onlineCodes = ['0222', '1153', '1156', '1157', '1158', '1159', '1160', '2115', '3141', '7062', '7063']
+			if(onlineCodes.contains(input)){
+				return true;
+			}
+			return false;
+		}
+
+
 		//ToDo: move this up, should be before handling
 		function generateMap(line){
 			let ind = line.substr(0, 3);
@@ -1168,6 +1824,17 @@ export default async function (stream) {
 			}else{
 				fonoMap.set(ind, [line])
 			}
+		}
+
+
+		function insertToControl008(start, length, data){
+			if(typeof(data) !== 'string' || data.length > length){
+				return false;
+			}
+			data.split('').forEach(function(char, ind) {
+				control008.push({ind: start+ind, val: char});
+			});
+			return true;
 		}
 
 		
