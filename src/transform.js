@@ -258,20 +258,26 @@ export default async function (stream) {
 						}]
 					});
 
-					// 007/00 s, 007/01/ d, 007/03 f, 007/06 g, 007/10 m
-					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'f'}, {ind: 6, val: 'g'}, {ind: 10, val: 'm'});
+					//Lisäksi emoon:
+					if(main){
+						// 007/00 s, 007/01/ d, 007/03 f, 007/06 g, 007/10 m
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'f'}, {ind: 6, val: 'g'}, {ind: 10, val: 'm'});
 
-					// emoon 300 ## $a 1 CD-äänilevy.
-					marcRecord.insertField({
-						tag: '300',
-						ind1: '',
-						ind2: '',
-						subfields:[{
-							code: 'a',
-							value: '1 CD-äänilevy'
-						}]
-					});
+						// 300 ## $a 1 CD-äänilevy.
+						marcRecord.insertField({
+							tag: '300',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'a',
+								value: '1 CD-äänilevy'
+							}]
+						});
 
+						// 338 ## $a äänilevy $b sd $2 rdacarrier
+						insert338('äänilevy', 'sd')
+					}
+					
 					return;
 				}
 
@@ -288,19 +294,37 @@ export default async function (stream) {
 						}]
 					});
 
-					// 007/00 s, 007/01 d, 007/03 b, 007/06 e, 007/10 p
-					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'b'}, {ind: 6, val: 'e'}, {ind: 10, val: 'p'});
+					
+					//Lisäksi emoon:
+					if(main){
+						// 007/00 s, 007/01 d, 007/03 b, 007/06 e, 007/10 p
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'b'}, {ind: 6, val: 'e'}, {ind: 10, val: 'p'});
 
-					// emoon 300 ## $a 1 äänilevy.
-					marcRecord.insertField({
-						tag: '300',
-						ind1: '',
-						ind2: '',
-						subfields:[{
-							code: 'a',
-							value: '1 äänilevy.'
-						}]
-					});
+						// emoon 300 ## $a 1 äänilevy.
+						marcRecord.insertField({
+							tag: '300',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'a',
+								value: '1 äänilevy.'
+							}]
+						});
+
+						// 338 ## $a äänilevy $b sd $2 rdacarrier
+						insert338('äänilevy', 'sd')
+
+						// 344 ## $c 33 1/3 kierr./min
+						marcRecord.insertField({
+							tag: '344',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'c',
+								value: '33 1/3 kierr./min'
+							}]
+						});
+					}
 					return;
 				}
 
@@ -317,23 +341,36 @@ export default async function (stream) {
 						}]
 					});
 
-					// 007/00 s, 007/01 d, 007/03 c, 007/06 c, 007/10 p
-					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'c'}, {ind: 6, val: 'c'}, {ind: 10, val: 'p'});
+					//Lisäksi emoon:
+					if(main){
+						// 007/00 s, 007/01 d, 007/03 c, 007/06 c, 007/10 p
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'c'}, {ind: 6, val: 'c'}, {ind: 10, val: 'p'});
 
-					// emoon 300 ## $a 1 äänilevy : $b 45 kierr./min.
-					marcRecord.insertField({
-						tag: '300',
-						ind1: '',
-						ind2: '',
-						subfields:[{
-							code: 'a',
-							value: '1 CD-äänilevy'
-						},{
-							code: 'b',
-							value: '45 kierr./min.'
-						}]
-					});
+						// emoon 300 ## $a 1 äänilevy : $b 45 kierr./min.
+						marcRecord.insertField({
+							tag: '300',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'a',
+								value: '1 CD-äänilevy'
+							}]
+						});
 
+						// 338 ## $a äänilevy $b sd $2 rdacarrier
+						insert338('äänilevy', 'sd')
+
+						// 344 ## $c 45 kierr./min
+						marcRecord.insertField({
+							tag: '344',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'c',
+								value: '45 kierr./min'
+							}]
+						});
+					}
 					return;
 				}
 
@@ -350,22 +387,25 @@ export default async function (stream) {
 						}]
 					});
 
-					// 007/00 s, 007/01 s, 007/03 l, 007/06 j, 007/10 p + 
-					control007.push({ind: 0, val: 's'}, {ind: 1, val: 's'}, {ind: 3, val: 'l'}, {ind: 6, val: 'j'}, {ind: 10, val: 'p'});
-
-					// emoon 300 $a 1 C-kasetti.
+					//Lisäksi emoon:
 					if(main){
-						marcRecord.insertField({
-							tag: '300',
-							ind1: '',
-							ind2: '',
-							subfields:[{
-								code: 'a',
-								value: 'C-kasetti.'
-							}]
-						});
-					}
+						// 007/00 s, 007/01 s, 007/03 l, 007/06 j, 007/10 p + 
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 's'}, {ind: 3, val: 'l'}, {ind: 6, val: 'j'}, {ind: 10, val: 'p'});
 
+						// emoon 300 $a 1 C-kasetti.
+						if(main){
+							marcRecord.insertField({
+								tag: '300',
+								ind1: '',
+								ind2: '',
+								subfields:[{
+									code: 'a',
+									value: '1 C-kasetti.'
+								}]
+							});
+						}
+					}
+					
 					return;
 				}
 				
@@ -382,11 +422,12 @@ export default async function (stream) {
 						}]
 					});
 
-					// 007/00 s, 007/01 d, 007/03 d, 007/06 d, 007/10
-					control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'd'}, {ind: 6, val: 'd'}, {ind: 10, val: '|'});
-
-					// emoon 300 ## $a 1 äänilevy : $b 78 kierr./min.
+					//Lisäksi emoon:
 					if(main){
+						// 007/00 s, 007/01 d, 007/03 d, 007/06 d, 007/10 |
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'd'}, {ind: 6, val: 'd'}, {ind: 10, val: '|'});
+						
+						// 300 ## $a 1 äänilevy
 						marcRecord.insertField({
 							tag: '300',
 							ind1: '',
@@ -394,7 +435,15 @@ export default async function (stream) {
 							subfields:[{
 								code: 'a',
 								value: '1 äänilevy'
-							},{
+							}]
+						});
+
+						// 344 ## $c 78 kierr./min
+						marcRecord.insertField({
+							tag: '344',
+							ind1: '',
+							ind2: '',
+							subfields:[{
 								code: 'b',
 								value: '78 kierr./min.'
 							}]
@@ -418,10 +467,95 @@ export default async function (stream) {
 						}]
 					});
 
-					// 104
-					// ToDo: missing config for 007 leader and marc field
+					// Jos Fonon 246 on verkkoaineistokoodi, niin
+					if(isOnlineMaterial()){
+						// 006 m||||| o||h||||||||
+						marcRecord.insertField({
+							tag: '006',
+							value: 'm||||| o||h||||||||'
+						})
+
+						// 007/00 s, 007/01 r, 007/03-12 |n|||||||||
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 'r'}, {ind: 3, val: '|'}, {ind: 4, val: 'n'}, 
+										{ind: 5, val: '|'}, {ind: 6, val: '|'}, {ind: 7, val: '|'}, {ind: 8, val: '|'}, 
+										{ind: 9, val: '|'}, {ind: 10, val: '|'}, {ind: 11, val: '|'}, {ind: 12, val: '|'});
+
+						// ToDo: 	008/23 o (vrt. VIOLA-55 - Authenticate to see issue details  )
+
+						// 337 ## $a tietokonekäyttöinen $b c $2 rdamedia
+						marcRecord.insertField({
+							tag: '300',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'a',
+								value: 'tietokonekäyttöinen'
+							},{
+								code: 'b',
+								value: 'c'
+							},{
+								code: '2',
+								value: 'rdamedia'
+							}]
+						});
+
+						// 338 ## $a verkkoaineisto $b cr $2 rdacarrier
+						insert338('verkkoaineisto', 'cr')
+						
+						// 347 ## $a äänitiedosto
+						marcRecord.insertField({
+							tag: 347,
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: a,
+								value: 'äänitiedosto'
+							}]
+						});
+
+					// muuten
+					}else{
+						// 007/00 s, 007/01 d 007/03 f, 007/06 g, 007/10 m
+						control007.push({ind: 0, val: 's'}, {ind: 1, val: 'd'}, {ind: 3, val: 'f'}, {ind: 6, val: 'g'}, {ind: 10, val: 'm'});
+
+						// 008/24 välilyönti
+						insertToControl008(24, 1, ' ');
+
+						// 300 ## $a 1 CD-äänilevy.
+						marcRecord.insertField({
+							tag: '300',
+							ind1: '',
+							ind2: '',
+							subfields:[{
+								code: 'a',
+								value: '1 äänilevy'
+							}]
+						});
+
+						// 338 ## $a äänilevy $b sd $2 rdacarrier
+						insert338('äänilevy', 'sd')
+					}
+
 					return;
 				}
+			}
+
+			function insert338(subfieldA, subfieldB = 'sd'){
+				marcRecord.insertField({
+					tag: '338',
+					ind1: '',
+					ind2: '',
+					subfields:[{
+						code: 'a',
+						value: subfieldA
+					},{
+						code: 'b',
+						value: subfieldB
+					},{
+						code: '2',
+						value: 'rdacarrier'
+					}]
+				});
 			}
 		}
 
@@ -429,86 +563,85 @@ export default async function (stream) {
 		// ToDo: input does not match specs
 		// Input: 'A01'
 		function handle103() {
-			if(main){
-				return;
-			}
-
-			const data103 = getSingle('103')
-			if(data103 === false){
-				Logger.log('error', `103 field: does not exist, or multiple fields`);
-				return;
-			}
-
-			console.log("main: ", main)
-
-			// 1. Remove leading zeroes with regex as it is needed in any case
-			let reg = /(0*)([1-9])/g //This seems to be working with capture groups
-
-			console.log("------ regex tests ------")
-			console.log('A01 -> ', 'A01'.replace(reg, '$2'))
-			console.log('A01-A02 -> ', 'A01-A02'.replace(reg, '$2'))
-			console.log('02-03 -> ', '02-03'.replace(reg, '$2'))
-			console.log('01-10 -> ', '01-10'.replace(reg, '$2'))
-			console.log('001-10 -> ', '001-10'.replace(reg, '$2'))
-			console.log('0002-0003 -> ', '0002-0003'.replace(reg, '$2'))
-			console.log("-------------------------")	
-
-			console.log(data103, '', data103.replace(reg, '$2'))
-			let data = data103.replace(reg, '$2')
-			console.log(data)
-
-			console.log("-------------------------")
-			let value = 'R';
-			// let regif = /\w\d/g;
-			// console.log('Regif: ', data.match(regif))	
-			data = '1:3-1:4'
-			//data = '1:3'
-
-
-			// Possibilities:
-			// 1:02 -> Levy 1, raita 2
-			// 1:03-1:04 -> Levy 1, raidat 3-4
-			// 01 -> Raita 1
-			// 01-08 -> Raidat 1-8
-			// A1 -> A-puoli, raita 1 //ToDo
-
-
-			// 2. Detect if need to separate by record
-			// ToDo: Check records spec as records from Yle are in format 'A01'
-			// jos monta levyä (esim. 1:02) -> 773 ## $g Levy 1, raita 2
-			// (esim. 1:03-1:04) -> 773 ## $g Levy 1, raidat 3-4
-			if(data.match(/\d:\d/g) || data.match(/\w\d/g)){
-				let structure = null;
-				if(data.match(/\d:\d/g)){
-					console.log("Match ':' with data: ", data, ", results: ")
-					console.log(data.split(/(\d):(\d)/).filter(n => n));
-					//'1:3' => [ '1', ':', '3' ]
-					//'1:3-1:4' => [ '1', ':', '3', '-', '1', ':', '4' ]
+			//vain teokset	
+			if(!main){
+				const data103 = getSingle('103')
+				if(data103 === false){
+					Logger.log('error', `103 field: does not exist, or multiple fields`);
+					return;
 				}
-				///^\w(?=\d)/g
-				if(data.match(/\w\d/g)){
-					console.log("Match '\w' with data: ", data, ", results: ", data.split(/(^\w)/g).filter(n => n))
-					structure = data.split(/(^\w)/g).filter(n => n); //Split by char at start of string
-					//'A1' => [ 'A', '1' ]
+
+				// 1. Remove leading zeroes with regex as it is needed in any case
+				let reg = /(0*)([1-9])/g //This seems to be working with capture groups
+
+				// console.log("main: ", main)
+				// console.log("------ regex tests ------")
+				// console.log('A01 -> ', 'A01'.replace(reg, '$2'))
+				// console.log('A01-A02 -> ', 'A01-A02'.replace(reg, '$2'))
+				// console.log('02-03 -> ', '02-03'.replace(reg, '$2'))
+				// console.log('01-10 -> ', '01-10'.replace(reg, '$2'))
+				// console.log('001-10 -> ', '001-10'.replace(reg, '$2'))
+				// console.log('0002-0003 -> ', '0002-0003'.replace(reg, '$2'))
+				// console.log("-------------------------")	
+				// console.log(data103, '', data103.replace(reg, '$2'))
+
+				let data = data103.replace(reg, '$2')
+				let value = 'R';
+
+				// console.log(data)
+				// console.log("-------------------------")
+
+				// let regif = /\w\d/g;
+				// console.log('Regif: ', data.match(regif))	
+				//data = '1:3-1:4'
+				//data = '1:3'
+
+
+				// Possibilities:
+				// 1:02 -> Levy 1, raita 2
+				// 1:03-1:04 -> Levy 1, raidat 3-4
+				// 01 -> Raita 1
+				// 01-08 -> Raidat 1-8
+				// A1 -> A-puoli, raita 1 //ToDo
+
+
+				// 2. Detect if need to separate by record
+				// ToDo: Check records spec as records from Yle are in format 'A01'
+				// jos monta levyä (esim. 1:02) -> 773 ## $g Levy 1, raita 2
+				// (esim. 1:03-1:04) -> 773 ## $g Levy 1, raidat 3-4
+				if(data.match(/\d:\d/g) || data.match(/\w\d/g)){
+					let structure = null;
+					if(data.match(/\d:\d/g)){
+						console.log("Match ':' with data: ", data, ", results: ")
+						console.log(data.split(/(\d):(\d)/).filter(n => n));
+						//'1:3' => [ '1', ':', '3' ]
+						//'1:3-1:4' => [ '1', ':', '3', '-', '1', ':', '4' ]
+					}
+					///^\w(?=\d)/g
+					if(data.match(/\w\d/g)){
+						console.log("Match '\w' with data: ", data, ", results: ", data.split(/(^\w)/g).filter(n => n))
+						structure = data.split(/(^\w)/g).filter(n => n); //Split by char at start of string
+						//'A1' => [ 'A', '1' ]
+					}
+					console.log("Structure: ", structure)
 				}
-				console.log("Structure: ", structure)
+
+				// 3. Detect if need to rename tracks
+				// osakohteet: 773 ## $g Raita [numero], muuta 01->1, 02->2 jne.
+				// jos monta uraa (esim. 01-08) -> 773 ## $g Raidat [numero-numero], muuta 01->1, 02->2 jne.
+
+
+				// 4. Insert transformation
+				marcRecord.insertField({
+					tag: '773',
+					ind1: '',
+					ind2: '',
+					subfields:[{
+						code: 'g',
+						value: value
+					}]
+				});
 			}
-
-			// 3. Detect if need to rename tracks
-			// osakohteet: 773 ## $g Raita [numero], muuta 01->1, 02->2 jne.
-			// jos monta uraa (esim. 01-08) -> 773 ## $g Raidat [numero-numero], muuta 01->1, 02->2 jne.
-
-
-			// 4. Insert transformation
-			marcRecord.insertField({
-				tag: '773',
-				ind1: '',
-				ind2: '',
-				subfields:[{
-					code: 'g',
-					value: value
-				}]
-			});
 		}
 
 
