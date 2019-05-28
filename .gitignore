@@ -5,5 +5,5 @@ dist
 .nyc_output
 .env
 
-src/yleRecords/
+test-fixtures/yleRecords/
 src/input.txt

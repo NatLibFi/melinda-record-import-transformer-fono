@@ -28,16 +28,16 @@
 
 import transform from './transform';
 import createValidator from './validate';
-// import {Transformer} from '@natlibfi/melinda-record-import-commons';
+// Import {Transformer} from '@natlibfi/melinda-record-import-commons';
 import fs from 'fs';
 
-// const {startTransformer} = Transformer;
+// Const {startTransformer} = Transformer;
 
 run();
 
 async function run() {
 	const validate = await createValidator();
-	//startTransformer(transform, validate);
+	// StartTransformer(transform, validate);
 
 	transform(fs.createReadStream('src/input.txt', 'utf8'));
 }

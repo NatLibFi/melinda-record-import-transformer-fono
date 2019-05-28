@@ -28,38 +28,110 @@
 
 import fs from 'fs';
 import path from 'path';
+import getStream from 'get-stream';
 import chai, {expect} from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import * as testContext from './transform';
+import {Readable} from 'stream';
+import {Utils} from '@natlibfi/melinda-commons';
 
+const {createLogger} = Utils;
 chai.use(sinonChai);
 
-const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/transform');
+const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/yleRecords/');
+
+
 
 describe('transform', () => {
 	beforeEach(() => {
 		// 008 has current date in it
-		testContext.default.__Rewire__('moment', sinon.fake.returns({
-			format: sinon.fake.returns('000000')
-		}));
+		// testContext.default.__Rewire__('moment', sinon.fake.returns({
+		// 	format: sinon.fake.returns('c')
+		// }));
 	});
 
 	afterEach(() => {
-		testContext.default.__ResetDependency__('moment');
+		// testContext.default.__ResetDependency__('moment');
 	});
 
+	let first = true;
 	fs.readdirSync(path.join(FIXTURES_PATH, 'in')).forEach(file => {
-		it(file, async () => {
-			const records = await testContext.default(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'));
-			const expectedPath = path.join(FIXTURES_PATH, 'out', file);
-
-			expect(records.map(r => r.toObject())).to.eql(JSON.parse(fs.readFileSync(expectedPath, 'utf8')));
-		});
+		if(first === true){
+			first = false;
+			it(file, async () => {
+				await checkEachField(file);
+			});
+		}
 	});
 });
+const config = [
+	{
+		fieldNums: ['112', '120'],
+		resFields: ['518'] //NV: nykykoodissa tämä on poikasen ensisijainen julkaisuvuosipaikka (008/07-10 ja 264$c [yyyy]), vrt. 222
+	}/*,{
 
-//Test data:
+	}*/
+]
+
+async function checkEachField(file){
+	config.forEach(async function(fieldConfig){
+		if(!(fieldConfig.fieldNums && fieldConfig.resFields)){
+			Logger.log('error', `invalid config field ${fieldConfig}`);
+		}
+
+		let records = await filterRecords(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'), fieldConfig.fieldNums); //['002', '190']
+		const s = new Readable();
+		s.push(Buffer.from(records, 'utf8'));
+		s.push(null);
+		let transformed = await testContext.default(s);
+		console.log("Transformed: ", JSON.stringify(transformed, null, 2))
+		const outPath = path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json'));
+		const expected = filterResults(JSON.parse(fs.readFileSync(outPath, 'utf8')), fieldConfig.resFields);
+		console.log("Expected: ", JSON.stringify(expected, null, 2));
+		//expect(records.map(r => r.toObject())).to.eql(JSON.parse(fs.readFileSync(outPath, 'utf8')));
+	})
+}
+
+async function filterResults(records, fieldNums){
+	// console.log(JSON.stringify(records, null, 2));
+	console.log("Records length: ", records.length)
+	console.log("Fieldnums: ", fieldNums);
+
+	let res = [];
+
+	//ToDo: filter object to contain only searched fields (in fieldNums )
+	console.log("------------ forEach filtering -----------")
+	records.forEach(function(rec){
+		let resObj = {leader: "", fields: []};
+		rec.fields.forEach(function(field){
+			if(typeof(field.tag) === 'undefined' || fieldNums.some(e => field.tag === e)){
+				console.log("****************")
+				console.log("Field: ", field, " matched")
+				resObj.fields.push(field)
+			}
+		})
+
+		console.log("Res:")
+		console.log(res);
+
+		// let res = rec.filter(field => fieldNums.some(function(e){
+		// 	e === field;
+		// }))
+		console.log("---------------------")
+	})
+	console.log("Res: ", res);
+}
+
+async function filterRecords(stream, fieldNums){
+	let text = await getStream(stream);
+	let reg = new RegExp('(\\r\\n(?!(' + fieldNums.join('|') + ')|\\*\\*\\*).+?(?=\\r\\n|$))', 'g'); //Remove unneeded fields for test
+	text = text.replace(reg, '' );
+	return text;
+}
+
+
+// Test data:
 
 // Äänitteet (main)
 // 140Beethoven, Ludwig van [1770-1827] (säv).
@@ -85,6 +157,16 @@ describe('transform', () => {
 
 // 140Kansanlaulu /1,3.  Irvine, Andy (säv, san /2).  Rig ma roll (sov /1).
 // 140Jaskari, Jaakko (sov /3).  Kyrö, Jaakko (sov /3).
+
+// 162SV1932
+// 162SV1902 valm
+// 162SV1684 julk
+// 162SV1743 noin
+// 162SV2016 ensi
+// 162SV1900 uud
+// 162SV1903 ork
+// 162SV2016 sov
+// 62SV1500-luku
 
 //-----------------------------------
 
