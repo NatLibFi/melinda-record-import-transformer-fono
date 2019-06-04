@@ -35,100 +35,255 @@ import sinonChai from 'sinon-chai';
 import * as testContext from './transform';
 import {Readable} from 'stream';
 import {Utils} from '@natlibfi/melinda-commons';
+import {MarcRecord} from '@natlibfi/marc-record';
+
 
 const {createLogger} = Utils;
 chai.use(sinonChai);
 
 const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/yleRecords/');
 
+const Logger = createLogger();
 
 
-describe('transform', () => {
-	beforeEach(() => {
-		// 008 has current date in it
-		// testContext.default.__Rewire__('moment', sinon.fake.returns({
-		// 	format: sinon.fake.returns('c')
-		// }));
-	});
 
-	afterEach(() => {
-		// testContext.default.__ResetDependency__('moment');
-	});
+let first = true;
+describe('transform - from files', () => {
+	fs.readdirSync(path.join(FIXTURES_PATH, 'in')).forEach(async (file) => {
+		describe('transform - for file: ' + file, () => {
+			if(first === true){
+				first = false;
 
-	let first = true;
-	fs.readdirSync(path.join(FIXTURES_PATH, 'in')).forEach(file => {
-		if(first === true){
-			first = false;
-			it(file, async () => {
-				await checkEachField(file);
-			});
-		}
+				//Read input:
+				let text = fs.readFileSync(path.join(FIXTURES_PATH, 'in', file), 'utf8');
+				let records = text.split(/^\*\*\*+/m).filter(n => n)
+
+				//Read output
+				let expectedOutput = JSON.parse(fs.readFileSync(path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json')), 'utf8'));
+
+				records.forEach(function(record, ind){
+					let lines = record.split(/[\r\n]+/).filter(n => n); // Split each line to array. Remove first, seems to be index not used in transformation
+
+					describe('transform - for record: ' + lines[0], () => {
+						lines.shift(); //Remove first (index)
+						let marcRecord = new MarcRecord();
+						let leader = '';
+						let fonoMap = new Map([])
+						
+						// record = record.replace(/\r\n$/, ''); // Remove possible extra linebreaks at end of string
+						lines.map(generateMapLine);
+						testContext.appendMap(fonoMap);
+						
+						console.log("******************************")
+						console.log("Fonomap: ", fonoMap)
+						console.log("Record: ", record)
+						console.log("******************************")
+
+
+						it('General Test', async function(){
+							record = '***'+record;
+							const s = new Readable();
+							s.push(Buffer.from(record, 'utf8'));
+							s.push(null);
+							let transformed = await testContext.default(s);
+
+							// console.log("-------- transformed ----------")
+							// console.log("leader: ", transformed[0].leader)
+							// console.log(transformed[0].fields)
+							// console.log("-------- expectedOutput ----------")
+							// console.log(expectedOutput[ind])
+
+							// expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
+							expect(transformed[0].leader).to.eql('');
+							expect(transformed[0].fields).to.eql(expectedOutput[ind].fields);
+						});
+
+						describe('Specific tests: ', () => {
+							beforeEach(function() {
+								marcRecord = new MarcRecord();
+								leader = '';
+							});
+							
+							it('001', (done) => {
+								testContext.handle001(fonoMap, marcRecord, Logger)
+								expect(marcRecord.fields['306']).to.eql(expectedOutput[ind]['306']);
+								done();  
+							});
+							
+							it('002', (done) => {
+								testContext.handle002(fonoMap, marcRecord, leader)
+								console.log("Leader: ", leader)
+								expect(marcRecord.fields['002']).to.eql(expectedOutput[ind]['']);
+								done();  
+							});
+							
+							it('', (done) => {
+								testContext.handle001(fonoMap, marcRecord, Logger)
+								expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+								done();  
+							});
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+							
+							// it('', (done) => {
+							// 	testContext.handle001(fonoMap, marcRecord, Logger)
+							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							// 	done();  
+							// });
+						});	
+
+						function generateMapLine(line) {
+							let ind = line.substr(0, 3);
+							line = line.substr(3);
+						
+							if (fonoMap.has(ind)) {
+								let arr = fonoMap.get(ind);
+								arr.push(line);
+								fonoMap.set(ind, arr);
+							} else {
+								fonoMap.set(ind, [line]);
+							}
+						}
+					});	
+				});
+			}
+		});
 	});
 });
-const config = [
-	{
-		fieldNums: ['112', '120'],
-		resFields: ['518'] //NV: nykykoodissa tämä on poikasen ensisijainen julkaisuvuosipaikka (008/07-10 ja 264$c [yyyy]), vrt. 222
-	}/*,{
 
-	}*/
-]
 
-async function checkEachField(file){
-	config.forEach(async function(fieldConfig){
-		if(!(fieldConfig.fieldNums && fieldConfig.resFields)){
-			Logger.log('error', `invalid config field ${fieldConfig}`);
-		}
+// const config = [
+// 	{
+// 		fieldNums: ['112', '120'],
+// 		resFields: ['518'] //NV: nykykoodissa tämä on poikasen ensisijainen julkaisuvuosipaikka (008/07-10 ja 264$c [yyyy]), vrt. 222
+// 	}/*,{
 
-		let records = await filterRecords(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'), fieldConfig.fieldNums); //['002', '190']
-		const s = new Readable();
-		s.push(Buffer.from(records, 'utf8'));
-		s.push(null);
-		let transformed = await testContext.default(s);
-		console.log("Transformed: ", JSON.stringify(transformed, null, 2))
-		const outPath = path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json'));
-		const expected = filterResults(JSON.parse(fs.readFileSync(outPath, 'utf8')), fieldConfig.resFields);
-		console.log("Expected: ", JSON.stringify(expected, null, 2));
-		//expect(records.map(r => r.toObject())).to.eql(JSON.parse(fs.readFileSync(outPath, 'utf8')));
-	})
-}
+// 	}*/
+// ]
 
-async function filterResults(records, fieldNums){
-	// console.log(JSON.stringify(records, null, 2));
-	console.log("Records length: ", records.length)
-	console.log("Fieldnums: ", fieldNums);
+// async function checkEachField(file){
+// 	config.forEach(async function(fieldConfig){
+// 		if(!(fieldConfig.fieldNums && fieldConfig.resFields)){
+// 			Logger.log('error', `invalid config field ${fieldConfig}`);
+// 		}
 
-	let res = [];
+// 		let records = await filterRecords(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'), fieldConfig.fieldNums); //['002', '190']
+// 		const s = new Readable();
+// 		s.push(Buffer.from(records, 'utf8'));
+// 		s.push(null);
+// 		let transformed = await testContext.default(s);
+// 		console.log("Transformed: ", JSON.stringify(transformed, null, 2))
+// 		const outPath = path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json'));
+// 		const expected = await filterResults(JSON.parse(fs.readFileSync(outPath, 'utf8')), fieldConfig.resFields);
+// 		console.log("Expected: ", JSON.stringify(expected, null, 2));
+// 		expect(transformed).to.eql(expected);
+// 	})
+// }
 
-	//ToDo: filter object to contain only searched fields (in fieldNums )
-	console.log("------------ forEach filtering -----------")
-	records.forEach(function(rec){
-		let resObj = {leader: "", fields: []};
-		rec.fields.forEach(function(field){
-			if(typeof(field.tag) === 'undefined' || fieldNums.some(e => field.tag === e)){
-				console.log("****************")
-				console.log("Field: ", field, " matched")
-				resObj.fields.push(field)
-			}
-		})
+// async function filterResults(records, fieldNums){
+// 	let res = [];
+// 	records.forEach(function(rec){
+// 		let resObj = {leader: "", fields: []};
+// 		rec.fields.forEach(function(field){
+// 			if(typeof(field.tag) === 'undefined' || fieldNums.some(e => field.tag === e)){
+// 				resObj.fields.push(field)
+// 			}
+// 		})
+// 		res.push(resObj);
+// 	})
+// 	return res;
+// }
 
-		console.log("Res:")
-		console.log(res);
+// async function filterRecords(stream, fieldNums){
+// 	let text = await getStream(stream);
+// 	let reg = new RegExp('(\\r\\n(?!(' + fieldNums.join('|') + ')|\\*\\*\\*).+?(?=\\r\\n|$))', 'g'); //Remove unneeded fields for test
+// 	text = text.replace(reg, '' );
+// 	return text;
+// }
 
-		// let res = rec.filter(field => fieldNums.some(function(e){
-		// 	e === field;
-		// }))
-		console.log("---------------------")
-	})
-	console.log("Res: ", res);
-}
 
-async function filterRecords(stream, fieldNums){
-	let text = await getStream(stream);
-	let reg = new RegExp('(\\r\\n(?!(' + fieldNums.join('|') + ')|\\*\\*\\*).+?(?=\\r\\n|$))', 'g'); //Remove unneeded fields for test
-	text = text.replace(reg, '' );
-	return text;
-}
+// before((done)=> {
+// 	console.log("Before")
+// 	setTimeout(function(){
+// 		console.log("Timeout")
+// 	}, 500);
+// 	let first = true;
+// 	fs.readdirSync(path.join(FIXTURES_PATH, 'in')).forEach(async (file) => {
+// 		if(first === true){
+// 			first = false;
+// 			let text = await getStream(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'));
+// 			records = text.split(/^\*\*\*+/m).filter(n => n)
+// 			console.log("Records: ", records)
+// 			done();
+// 		}
+// 	});
+// 	// it(file, async () => {
+// 	// 	await checkEachField(file);
+// 	// });
+// });
+
+// beforeEach(() => {
+// 	// 008 has current date in it
+// 	// testContext.default.__Rewire__('moment', sinon.fake.returns({
+// 	// 	format: sinon.fake.returns('c')
+// 	// }));
+// });
+
+// afterEach(() => {
+// 	// testContext.default.__ResetDependency__('moment');
+// });
 
 
 // Test data:
