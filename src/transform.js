@@ -40,7 +40,6 @@ export default async function (stream) {
 	// This is replaced with development dummy data input below
 	// const records = await JSON.parse(await getStream(stream));
 	const records = await inputTestData(stream);
-	console.log("Records: ", records)
 
 	// This is custom part
 	// console.log('--------------------');
@@ -93,8 +92,8 @@ export default async function (stream) {
 		lines.map(generateMapLine);
 		appendMap(fonoMap);
 
-		console.log("--------- fonoMap -----------")
-		console.log(fonoMap)
+		// console.log("--------- fonoMap -----------")
+		// console.log(fonoMap)
 
 		handleLeader(fonoMap, marcRecord, Logger);
 		handle001(fonoMap, marcRecord, Logger); //Ok
@@ -116,7 +115,7 @@ export default async function (stream) {
 		handle191(fonoMap, marcRecord, Logger); //Do this at the same time as 190
 		handle200(fonoMap, marcRecord, Logger); //Do this
 		handle222(fonoMap, marcRecord, Logger, control008); //Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
-		handle223and225(fonoMap, marcRecord, Logger, control008); //Ok
+		handle223and225(fonoMap, Logger, control008); //Ok
 		handle224(fonoMap, marcRecord, Logger, control008); //Ok
 		//handle228(); //NV: tätä ei enää käytetä
 		handle230(fonoMap, marcRecord, Logger);
@@ -178,7 +177,7 @@ export function appendMap(fonoMap){
 		if (dataAll) {
 			let data = '';
 			dataAll.forEach(line => {
-				if (line.match(/^\s/) || data.match(/\s$/)) {
+				if (data.length === 0|| line.match(/^\s/) || data.match(/\s$/)) {
 					data += line;
 				} else {
 					data = data + ' ' + line;
@@ -1749,6 +1748,7 @@ export function handle151(fonoMap, marcRecord, Logger) {
 	if (fonoMap.main()) {
 		let data = data151.replace(/\.\s{2}/g, ' ; ');
 		data = data.replace(/\.$/, '');
+
 		marcRecord.insertField({
 			tag: '505',
 			ind1: '',
@@ -2072,7 +2072,7 @@ export function handle222(fonoMap, marcRecord, Logger, control008) {
 	}
 }
 
-export function handle223and225(fonoMap, marcRecord, Logger, control008) {
+export function handle223and225(fonoMap, Logger, control008) {
 	let matches = null;
 	// From 225: 008/15-17 ks. ylekoodit
 	if (fonoMap.exists(225)) {
@@ -2192,8 +2192,8 @@ export function handle230(fonoMap, marcRecord, Logger) {
 
 	// Emot: 028 01 $b levymerkki $a tuotetunnus (lisätieto) - tuotetunnuksesta pois tyhjämerkit
 	if (!fonoMap.main()) {
-		console.log('-------- 230 --------');
-		console.log('data: ', data230);
+		// console.log('-------- 230 --------');
+		// console.log('data: ', data230);
 
 		data230.every(line => {
 			// Ei konvertoida: ”Ei kaupallista tunnusta”, ”Ei tilausnumeroa”

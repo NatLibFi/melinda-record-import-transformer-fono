@@ -62,23 +62,27 @@ describe('transform - from files', () => {
 				let expectedOutput = JSON.parse(fs.readFileSync(path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json')), 'utf8'));
 
 				records.forEach(function(record, ind){
+					if(ind > 1){
+						console.log("Breaking")
+						return;
+					}
 					let lines = record.split(/[\r\n]+/).filter(n => n); // Split each line to array. Remove first, seems to be index not used in transformation
 
 					describe('transform - for record: ' + lines[0], () => {
 						lines.shift(); //Remove first (index)
 						let marcRecord = new MarcRecord();
-						let leader = '';
+						let data = null;
+						let data2 = null;
 						let fonoMap = new Map([])
 						
 						// record = record.replace(/\r\n$/, ''); // Remove possible extra linebreaks at end of string
 						lines.map(generateMapLine);
 						testContext.appendMap(fonoMap);
 						
-						console.log("******************************")
-						console.log("Fonomap: ", fonoMap)
-						console.log("Record: ", record)
-						console.log("******************************")
-
+						// console.log("******************************")
+						// console.log("Fonomap: ", fonoMap)
+						// console.log("Record: ", record)
+						// console.log("******************************")
 
 						it('General Test', async function(){
 							record = '***'+record;
@@ -93,95 +97,174 @@ describe('transform - from files', () => {
 							// console.log("-------- expectedOutput ----------")
 							// console.log(expectedOutput[ind])
 
-							// expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
-							expect(transformed[0].leader).to.eql('');
+							expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
 							expect(transformed[0].fields).to.eql(expectedOutput[ind].fields);
 						});
 
-						describe('Specific tests: ', () => {
+						describe('Specific tests:', () => {
 							beforeEach(function() {
 								marcRecord = new MarcRecord();
-								leader = '';
+								data = null;
+								data2 = null;
 							});
 							
 							it('001', (done) => {
 								testContext.handle001(fonoMap, marcRecord, Logger)
-								expect(marcRecord.fields['306']).to.eql(expectedOutput[ind]['306']);
+								expect(matchSubfields(marcRecord)).to.eql(true);
 								done();  
 							});
 							
 							it('002', (done) => {
-								testContext.handle002(fonoMap, marcRecord, leader)
-								console.log("Leader: ", leader)
-								expect(marcRecord.fields['002']).to.eql(expectedOutput[ind]['']);
+								data = []; //leader
+								testContext.handle002(fonoMap, Logger, data)
+								expect(matchStructure(data, expectedOutput[ind].leader, 'leader')).to.eql(true);
 								done();  
 							});
 							
-							it('', (done) => {
-								testContext.handle001(fonoMap, marcRecord, Logger)
-								expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							it('102&104', (done) => {
+								data = []; //control007
+								data2 = []; //control008
+								testContext.handle102and104(fonoMap, marcRecord, Logger, data, data2)
+								expect(matchStructure(data, getExpectedField('007'), 'control007')).to.eql(true);
+								expect(matchStructure(data2, getExpectedField('008'), 'control008')).to.eql(true);
+								done();  
+							});
+								
+							it('103', (done) => {
+								testContext.handle103(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
 								done();  
 							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
+							it('112', (done) => {
+								testContext.handle112(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+
+							// it('120 - ToDo when transformation done', (done) => {
+							// 	testContext.handle120(fonoMap, marcRecord, Logger)
+							// 	// console.log("Marc: ", JSON.stringify(marcRecord, null, 2));
+							// 	expect(matchSubfields(marcRecord)).to.eql(true);
 							// 	done();  
 							// });
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('130', (done) => {
+								testContext.handle130(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('140', (done) => {
+								testContext.handle140(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('141', (done) => {
+								testContext.handle141(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('150', (done) => {
+								testContext.handle150(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('151', (done) => {
+								testContext.handle151(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('162', (done) => {
+								testContext.handle162(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('170', (done) => {
+								data = []; //control008
+								testContext.handle170(fonoMap, marcRecord, Logger, data)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('175', (done) => {
+								testContext.handle175(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
 							
-							// it('', (done) => {
-							// 	testContext.handle001(fonoMap, marcRecord, Logger)
-							// 	expect(marcRecord.fields['']).to.eql(expectedOutput[ind]['']);
-							// 	done();  
-							// });
+							it('180', (done) => {
+								testContext.handle180(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+							
+							it('190', (done) => {
+								testContext.handle190(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+							
+							it('191', (done) => {
+								testContext.handle191(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+							
+							it('200', (done) => {
+								testContext.handle200(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+							
+							it('222', (done) => {
+								data = []; //control008
+								testContext.handle222(fonoMap, marcRecord, Logger, data)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
+								done();  
+							});
+							
+							it('223&225', (done) => {
+								data = []; //control008
+								testContext.handle223and225(fonoMap, Logger, data)
+								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
+								done();  
+							});
+							
+							it('224', (done) => {
+								data = []; //control008
+								testContext.handle224(fonoMap, marcRecord, Logger, data)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
+								done();  
+							});
+							
+							it('230', (done) => {
+								testContext.handle230(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+							
+							it('243', (done) => {
+								testContext.handle243(fonoMap, marcRecord, Logger)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();  
+							});
+							
+							it('244', (done) => {
+								data = []; //control008
+								testContext.handle244(fonoMap, marcRecord, Logger, data)
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
+								done();  
+							});
 						});	
 
 						function generateMapLine(line) {
@@ -196,6 +279,84 @@ describe('transform - from files', () => {
 								fonoMap.set(ind, [line]);
 							}
 						}
+
+						function getExpectedField(tag){
+							return expectedOutput[ind].fields.find(field => {
+								return field.tag === tag;
+							});
+						}
+
+						function getExpectedFields(tags){
+							return expectedOutput[ind].fields.filter(field => {
+								return tags.includes(field.tag);
+							});
+						}
+
+						//Checks if returned control/leader field structure matches fields from existing (expected) transformations
+						let matchStructure = function(input, expected, context){
+							// console.log("input: ", input)
+							// console.log("expected: ", expected)
+
+							if(input === null || typeof(input) !== 'object'){
+								return false;
+							}
+
+							if(typeof(expected) === 'object' && typeof(expected.value) === 'string'){
+								expected = expected.value;
+							}
+
+							let ok = true;
+							input.forEach(function(e){
+								if(expected[e.ind] !== e.val){
+									console.log(`Failed match check: ${e.val} not expected ${expected[e.ind]} in ${context} index ${e.ind}`);
+									ok = false;
+								}
+							})
+
+							return ok;
+						}
+
+						//Cheks if returned MarcRecords subfields exists in expected transformation
+						let matchSubfields = function(input){
+							// console.log("Input: ", JSON.stringify(input, null, 2));
+							
+							if(input === null || typeof(input) !== 'object'){
+								return false;
+							}
+
+							let ok = true;
+							//Go trough each field:
+							input.fields.forEach(function(field){
+								let comp = getExpectedField(field.tag)
+								// console.log("Compare: ", field)
+								// console.log("to: ", comp)
+								
+								if(typeof(comp) === 'undefined'){
+									console.log(`Failed match check: ${JSON.stringify(field, null, 2)} comparison not found from expected`);
+									ok = false;
+								}else{
+									//Go trough each subfield of input
+									field.subfields.forEach(function(sub){
+										// console.log("---------------------------")
+										// console.log("Checking: ", sub)
+										// console.log("against: ", comp)
+
+										//Check comparison subfield against expected fields subfields
+										if(!comp.subfields.some(compSub => {
+											// console.log("Some: ", field)
+											return compSub.code === sub.code && compSub.value === sub.value;
+										})){
+											console.log(`Failed match check: ${JSON.stringify(sub, null, 2)} not found from expected ${JSON.stringify(comp.subfields, null, 2)} in ${field.tag}`);
+											ok = false;
+										}
+										// else{
+										// 	console.log("Found match")
+										// };
+									})
+								}	
+							})
+							return ok;
+						}
 					});	
 				});
 			}
@@ -203,6 +364,40 @@ describe('transform - from files', () => {
 	});
 });
 
+// //Check subfield against expected fields subfields
+// if(!comp.some(rec => {
+// 	console.log("Rec: ", rec)
+// 	return field.tag === rec.tag && rec.subfields.some(field => {
+// 		console.log("Some: ", field)
+// 		return field.code === rec.code && field.value === rec.value;
+// 	})
+// })){
+// 	console.log(`Failed match check: ${JSON.stringify(sub, null, 2)} not found from expected ${JSON.stringify(expected.subfields, null, 2)} in ${context}`);
+// 	ok = false;
+// }else{
+// 	console.log("Found match")
+// };
+
+// input.fields.find(field => {
+// 	return field.tag === tag;
+// }).subfields.forEach(function(e){
+// 	console.log("---------------------------")
+// 	console.log("Checking for: ", e, ", ")
+// 	// console.log("Find: ", expected.subfields.some(field => {
+// 	// 	return field.code === e.code && field.value === e.value;
+// 	// }));
+
+// 	if(!expected.some(rec => {
+// 		console.log("Rec: ", rec)
+// 		return field.tag === rec.tag && rec.subfields.some(field => {
+// 			console.log("Some: ", field)
+// 			return field.code === e.code && field.value === e.value;
+// 		})
+// 	})){
+// 		console.log(`Failed match check: ${JSON.stringify(e, null, 2)} not found from expected ${JSON.stringify(expected.subfields, null, 2)} in ${context}`);
+// 		ok = false;
+// 	};
+// })
 
 // const config = [
 // 	{
