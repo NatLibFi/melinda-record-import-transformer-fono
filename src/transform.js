@@ -26,12 +26,16 @@
 *
 */
 
+/* eslint max-params: ['error', 5], capitalized-comments: ['off']  */
+/* eslint-disable capitalized-comments, no-warning-comments */
+
 import moment from 'moment';
 import getStream from 'get-stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
 
 const {createLogger} = Utils;
+// console.log('--------------------');
 
 export default async function (stream) {
 	MarcRecord.setValidationOptions({subfieldValues: false});
@@ -47,34 +51,34 @@ export default async function (stream) {
 	// console.log('--------------------');
 	// End of custom part
 
-	const codes = new Map([
-		[/^KAB\b/i, '78.742'],
-		[/^KAF\b/i, '78.812'],
-		[/^KAG\b/i, '78.65'],
-		[/^KAH\b/i, '78.66'],
-		[/^KAK\b/i, '78.822'],
-		[/^KAP\b/i, '78.61'],
-		[/^KAR\b/i, '78.871'],
-		[/^KAS\b/i, '78.822'],
-		[/^KAT\b/i, '78.852'],
-		[/^KAV\b/i, '78.712'],
+	// const codes = new Map([
+	// 	[/^KAB\b/i, '78.742'],
+	// 	[/^KAF\b/i, '78.812'],
+	// 	[/^KAG\b/i, '78.65'],
+	// 	[/^KAH\b/i, '78.66'],
+	// 	[/^KAK\b/i, '78.822'],
+	// 	[/^KAP\b/i, '78.61'],
+	// 	[/^KAR\b/i, '78.871'],
+	// 	[/^KAS\b/i, '78.822'],
+	// 	[/^KAT\b/i, '78.852'],
+	// 	[/^KAV\b/i, '78.712'],
 
-		[/^KKL\b/i, '78.3414'],
-		[/^KKM\b/i, '78.3412'],
-		[/^KKN\b/i, '78.3413'],
-		[/^KKP\b/i, '78.3414'],
-		[/^KKQ\b/i, '78.3411'],
-		[/^KKT\b/i, '78.3414'],
-		[/^KKU\b/i, '78.3414'],
+	// 	[/^KKL\b/i, '78.3414'],
+	// 	[/^KKM\b/i, '78.3412'],
+	// 	[/^KKN\b/i, '78.3413'],
+	// 	[/^KKP\b/i, '78.3414'],
+	// 	[/^KKQ\b/i, '78.3411'],
+	// 	[/^KKT\b/i, '78.3414'],
+	// 	[/^KKU\b/i, '78.3414'],
 
-		[/^KO\b/i, '78.54'],
-		[/^KOC\b/i, '78.52'],
-		[/^KOF\b/i, '78.54'],
-		[/^KOJ\b/i, '78.521'],
-		[/^KOW\b/i, '78.53'],
+	// 	[/^KO\b/i, '78.54'],
+	// 	[/^KOC\b/i, '78.52'],
+	// 	[/^KOF\b/i, '78.54'],
+	// 	[/^KOJ\b/i, '78.521'],
+	// 	[/^KOW\b/i, '78.53'],
 
-		[/^KW\b/i, '78.51']
-	]);
+	// 	[/^KW\b/i, '78.51']
+	// ]);
 
 	Logger.log('debug', `Starting conversion of ${records.length} records...`);
 	return Promise.all(records.map(convertRecord));
@@ -88,42 +92,37 @@ export default async function (stream) {
 
 		record = record.replace(/\r\n$/, ''); // Remove possible extra linebreaks at end of string
 		let lines = record.split(/[\r\n]+/).filter(n => n); // Split each line to array. Remove first
-		lines.shift(); //Remove first, seems to be index not used in transformation
+		lines.shift(); // Remove first, seems to be index not used in transformation
 		lines.map(generateMapLine);
 		appendMap(fonoMap);
 
-		// console.log("--------- fonoMap -----------")
-		// console.log(fonoMap)
-
 		handleLeader(fonoMap, marcRecord, Logger);
-		handle001(fonoMap, marcRecord, Logger); //Ok
-		handle002(fonoMap, Logger, leader000); //Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
-		handle102and104(fonoMap, marcRecord, Logger, control007, control008); //ToDo: Voyager clause not checked //This dictates how 102 is handled
-		handle103(fonoMap, marcRecord, Logger); //Ok
-		handle112(fonoMap, marcRecord, Logger); //Ok
+		handle001(fonoMap, marcRecord, Logger); // Ok
+		handle002(fonoMap, Logger, leader000); // Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
+		handle102and104(fonoMap, marcRecord, Logger, control007, control008); // ToDo: Voyager clause not checked //This dictates how 102 is handled
+		handle103(fonoMap, marcRecord, Logger); // Ok
+		handle112(fonoMap, marcRecord, Logger); // Ok
 		handle120(fonoMap, marcRecord, Logger); // ToDo: How data is supposed to be parsed from input? Complex
-		handle130(fonoMap, marcRecord, Logger); //Ok
-		handle140(fonoMap, marcRecord, Logger); //Need rework as specs have been updated, do 190 simultaneously
-		handle141(fonoMap, marcRecord, Logger); //Ok
-		handle150(fonoMap, marcRecord, Logger); //ToDo: inconsistency with 505 and 245
+		handle130(fonoMap, marcRecord, Logger); // Ok
+		handle140(fonoMap, marcRecord, Logger); // Need rework as specs have been updated, do 190 simultaneously
+		handle141(fonoMap, marcRecord, Logger); // Ok
+		handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245
 		handle151(fonoMap, marcRecord, Logger);
 		handle162(fonoMap, marcRecord, Logger);
 		handle170(fonoMap, marcRecord, Logger, control008);
-		handle175(fonoMap, marcRecord, Logger); //Ok
-		handle180(fonoMap, marcRecord, Logger); //Ok
-		handle190(fonoMap, marcRecord, Logger); //Do this at the same time as 140
-		handle191(fonoMap, marcRecord, Logger); //Do this at the same time as 190
-		handle200(fonoMap, marcRecord, Logger); //Do this
-		handle222(fonoMap, marcRecord, Logger, control008); //Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
-		handle223and225(fonoMap, Logger, control008); //Ok
-		handle224(fonoMap, marcRecord, Logger, control008); //Ok
-		//handle228(); //NV: tätä ei enää käytetä
+		handle175(fonoMap, marcRecord, Logger); // Ok
+		handle180(fonoMap, marcRecord, Logger); // Ok
+		handle190(fonoMap, marcRecord, Logger); // Do this at the same time as 140
+		handle191(fonoMap, marcRecord, Logger); // Do this at the same time as 190
+		handle200(fonoMap, marcRecord, Logger); // Do this
+		handle222(fonoMap, marcRecord, Logger, control008); // Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
+		handle223and225(fonoMap, Logger, control008); // Ok
+		handle224(fonoMap, marcRecord, Logger, control008); // Ok
+		// handle228(); // NV: tätä ei enää käytetä
 		handle230(fonoMap, marcRecord, Logger);
 		handle243(fonoMap, marcRecord, Logger);
 		handle244(fonoMap, marcRecord, Logger, control008);
 
-		// console.log("--------- marcRecord -----------")
-		// console.log(JSON.stringify(marcRecord, null, 2))
 		return marcRecord;
 
 		function handleLeader() {
@@ -133,7 +132,7 @@ export default async function (stream) {
 		function generateMapLine(line) {
 			let ind = line.substr(0, 3);
 			line = line.substr(3);
-		
+
 			if (fonoMap.has(ind)) {
 				let arr = fonoMap.get(ind);
 				arr.push(line);
@@ -145,17 +144,15 @@ export default async function (stream) {
 	}
 }
 
-
-
-export function appendMap(fonoMap){
-	fonoMap.exists = function(ind) {
+export function appendMap(fonoMap) {
+	fonoMap.exists = function (ind) {
 		if (fonoMap.has(ind)) {
 			return true;
 		}
 		return false;
-	}
+	};
 
-	fonoMap.getSingle = function(ind) {
+	fonoMap.getSingle = function (ind) {
 		if (fonoMap.has(ind)) {
 			let data = fonoMap.get(ind);
 			if (data.length === 1) {
@@ -163,21 +160,21 @@ export function appendMap(fonoMap){
 			}
 		}
 		return false;
-	}
+	};
 
-	fonoMap.getAll = function(ind) {
+	fonoMap.getAll = function (ind) {
 		if (fonoMap.has(ind)) {
 			return fonoMap.get(ind);
 		}
 		return false;
-	}
+	};
 
-	fonoMap.getAllCombined = function(ind) {
+	fonoMap.getAllCombined = function (ind) {
 		const dataAll = fonoMap.getAll(ind);
 		if (dataAll) {
 			let data = '';
 			dataAll.forEach(line => {
-				if (data.length === 0|| line.match(/^\s/) || data.match(/\s$/)) {
+				if (data.length === 0 || line.match(/^\s/) || data.match(/\s$/)) {
 					data += line;
 				} else {
 					data = data + ' ' + line;
@@ -186,13 +183,13 @@ export function appendMap(fonoMap){
 			return data;
 		}
 		return dataAll;
-	}
+	};
 
 	const data002 = fonoMap.getSingle('002');
-	const main = (data002 && data002.charAt(8) === '1') ? true:false;
-	fonoMap.main = function(){
-		return main
-	}
+	const main = (data002 && data002.charAt(8) === '1');
+	fonoMap.main = function () {
+		return main;
+	};
 }
 
 // Esimerkkitietueen läpikäynti
@@ -263,7 +260,7 @@ export function handle001(fonoMap, marcRecord, Logger) {
 }
 
 // Seems to originate from index 8 of input: (9th char)
-// Input "201704051PV2017"
+// Input '201704051PV2017'
 export function handle002(fonoMap, Logger, leader000) {
 	const data002 = fonoMap.getSingle('002');
 	if (data002 === false) {
@@ -277,7 +274,7 @@ export function handle002(fonoMap, Logger, leader000) {
 	} else if (data002.charAt(8) === '2') {
 		leader000.push({ind: 6, val: 'j'}, {ind: 7, val: 'a'});
 	} else {
-		Logger.log('error', `Invalid 002 field: ${data002} - index 8 should be 1 or 2, is: ${data.charAt(8)}`);
+		Logger.log('error', `Invalid 002 field: ${data002} - index 8 should be 1 or 2, is: ${data002.charAt(8)}`);
 	}
 }
 
@@ -538,7 +535,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 					{ind: 5, val: '|'}, {ind: 6, val: '|'}, {ind: 7, val: '|'}, {ind: 8, val: '|'},
 					{ind: 9, val: '|'}, {ind: 10, val: '|'}, {ind: 11, val: '|'}, {ind: 12, val: '|'});
 
-				// ToDo: 	008/23 o (vrt. VIOLA-55 - Authenticate to see issue details  )
+				// ToDo: 008/23 o (vrt. VIOLA-55 - Authenticate to see issue details  )
 
 				// 337 ## $a tietokonekäyttöinen $b c $2 rdamedia
 				marcRecord.insertField({
@@ -566,7 +563,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 					ind1: '',
 					ind2: '',
 					subfields: [{
-						code: a,
+						code: 'a',
 						value: 'äänitiedosto'
 					}]
 				});
@@ -593,6 +590,12 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 				// 338 ## $a äänilevy $b sd $2 rdacarrier
 				insert338('äänilevy', 'sd');
 			}
+			return;
+		}
+
+		default: {
+			Logger.log('error', `104 field: value not identified '${data104}'`);
+			break;
 		}
 	}
 
@@ -624,7 +627,7 @@ export function handle103(fonoMap, marcRecord, Logger) {
 		}
 
 		let data = data103.replace(/(0*)([1-9])/g, '$2'); // Remove leading zeroes
-		const range = data.split(/\-/).filter(n => n);
+		const range = data.split(/-/).filter(n => n);
 		let ends = [];
 
 		range.every(end => {
@@ -634,7 +637,7 @@ export function handle103(fonoMap, marcRecord, Logger) {
 		});
 
 		let discs = ends[0].length > 1 ? 1 : 0; // Check if there is disc info
-		const hasSides = Boolean(discs > 0 && ends[0][0].match(/^\D$/)); // Check if there is "A-puoli" or "B-puoli"
+		const hasSides = Boolean(discs > 0 && ends[0][0].match(/^\D$/)); // Check if there is 'A-puoli' or 'B-puoli'
 
 		if (discs !== 0) { // If there is disc info, calculate how many disc actually
 			let curDisc = ends[0][0];
@@ -650,24 +653,24 @@ export function handle103(fonoMap, marcRecord, Logger) {
 		// jos monta uraa 	(esim. 01-08) 		-> 773 ## $g Raidat [numero-numero], muuta 01->1, 02->2 jne.
 		// jos monta levyä 	(esim. 1:02)		-> 773 ## $g Levy 1, raita 2
 		// 					(esim. 1:03-1:04) 	-> 773 ## $g Levy 1, raidat 3-4
-		// +Added handling of "sides" like in previous solution
+		// +Added handling of 'sides' like in previous solution
 		let value = '';
 		if (ends.length > 1 && discs > 1) {
-			value =	(!hasSides ? `Levy ${ends[0][0]}` : `${ends[0][0]}-puoli`) + `, raita ${ends[0][1]}` +
-					(!hasSides ? ` - levy ${ends[1][0]}` : ` - ${ends[1][0]}-puoli`) + `, raita ${ends[1][1]}`;
+			value =	(hasSides ? `${ends[0][0]}-puoli` : `Levy ${ends[0][0]}`) + `, raita ${ends[0][1]}` +
+					(hasSides ? ` - ${ends[1][0]}-puoli` : ` - levy ${ends[1][0]}`) + `, raita ${ends[1][1]}`;
 		} else if (ends.length > 1) {
 			if (ends.length > 2) {
 				Logger.log('error', '103 field: more than 2 ends detected');
 			}
 
 			if (discs > 0) {
-				value = (!hasSides ? `Levy ${ends[0][0]},` : `${ends[0][0]}-puoli, `) +
+				value = (hasSides ? `${ends[0][0]}-puoli, ` : `Levy ${ends[0][0]},`) +
 						(discs > 0 ? ' raidat ' : 'Raidat ') + `${ends[0][1]}-${ends[1][1]}`;
 			} else {
 				value = value + (discs > 0 ? 'raidat ' : 'Raidat ') + `${ends[0][0]}-${ends[1][0]}`;
 			}
 		} else if (discs > 0) {
-			value = (!hasSides ? `Levy ${ends[0][0]}, ` : `${ends[0][0]}-puoli, `) +
+			value = (hasSides ? `${ends[0][0]}-puoli, ` : `Levy ${ends[0][0]}, `) +
 						(discs > 0 ? 'raita ' : 'Raita ') + ends[0][1];
 		}
 
@@ -691,19 +694,21 @@ export function handle112(fonoMap, marcRecord, Logger) {
 		return;
 	}
 
-	// 518 ## $a Äänitetty: yyyy.
-	// jos myös Fonon 120 -> 518 ## $a Äänitetty: yyyy,
-	let value = null;
+	// Jos-ja-vain-jos Fonon 120-kenttää ei ole, niin luodaan
+	// 518 ## $o Äänitys $d yyyy.
+	// ToDo, check: NV: nykykoodissa tämä on poikasen ensisijainen julkaisuvuosipaikka (008/07-10 ja 264$c [yyyy]), vrt. 222
 	if (!data120) {
-		value = 'Äänitetty: ' + data112.match(/[0-9]{4}/)[0] + ',';
-
 		marcRecord.insertField({
 			tag: '518',
 			ind1: '',
 			ind2: '',
 			subfields: [{
-				code: 'a',
-				value: value
+				code: 'o',
+				value: 'Äänitys:'
+			},
+			{
+				code: 'd',
+				value: data112.match(/[0-9]{4}/)[0] + '.'
 			}]
 		});
 	}
@@ -729,63 +734,60 @@ export function handle120(fonoMap, marcRecord, Logger) {
 		return;
 	}
 
-	if (data120.match(/; *äänisuunnittelija: [^\.;:]+(;|$)/g)) {
+	if (data120.match(/; *äänisuunnittelija: [^.;:]+(;|$)/g)) {
 		Logger.log('error', '120 field: Äänisuunnittelija detected. ToDO: handle this');
 	}
-	// console.log('*****************************');
-	// console.log('data120: ', data120);
 
 	let places = data120.split(/\)\.\s+/).filter(n => n);
-	// console.log('Places: ', places);
 
 	for (let i = 0; i < places.length; i++) {
 		if (i < places) {
-			places[i] = places[i] + ')'; // Palauta splitin "syömä" sulku
+			places[i] += ')'; // Palauta splitin 'syömä' sulku
 		}
 	}
 
-	// console.log('Places repaired: ', places);
-
 	// Pisteelliset normaalin splittauksen poikkeustapaukset
 	for (let i = 0; i < places.length; i++) {
-		// 2017Q4:ssä nähtiin tapaus, jossa yllä oleva ")."-erotin ei toiminutkaan:
+		// 2017Q4:ssä nähtiin tapaus, jossa yllä oleva ').'-erotin ei toiminutkaan:
 		// console.log('1. For: ', i, ' place: ', places[i]);
-		// console.log('Match: ', places[i].match(/(\/\d+:\d+\-\d+)\.\s+(.*)/));
-		// "Tshekki: Vizovice: Masters of Rock 20160715 (live) /2:01-19. Tshekki: Vizovice: Masters of Rock 20140711 (live) /3:01-19"
-		while (places[i].match(/(\/\d+:\d+\-\d+)\.\s+(.*)/)) {
-			let other_half = 2;
-			// console.log('120 SPLIT //1:\n \'places[i]\' vs\n \'other_half\'\n');
-			splice(places, i + 1, 0, other_half);
+		// console.log('Match: ', places[i].match(/(\/\d+:\d+-\d+)\.\s+(.*)/));
+		// 'Tshekki: Vizovice: Masters of Rock 20160715 (live) /2:01-19. Tshekki: Vizovice: Masters of Rock 20140711 (live) /3:01-19'
+		while (places[i].match(/(\/\d+:\d+-\d+)\.\s+(.*)/)) {
+			console.log('Other half splicing commented 1');
+			// let latterHalf = 2;
+			// console.log('120 SPLIT //1:\n \'places[i]\' vs\n \'latterHalf\'\n');
+			// places.splice(places, i + 1, 0, latterHalf);
 		}
 	}
 
 	// Siivouksia ennen ja-tyyppiä
 	for (let i = 0; i < places.length; i++) {
 		// console.log('2. For: ', i);
-		// console.log('Match: ', places[i].match(/\(live\) (\/\d+:\d+\-\d+)/));
-		// console.log('Match: ', places[i].match(/\(live\) *\( *(\/(\d+)([,\-]\d+)*|CD\d+)\)/));
-		// console.log('Match: ', places[i].match(/\(live\) *\/((\d+)([,\-]\d+)*|CD\d+)/));
-		//  "(live) ( /01-05)" => "(live /01-05)"
-		while (places[i].match(/\(live\) (\/\d+:\d+\-\d+)/) || // (live $1)/
-			places[i].match(/\(live\) *\( *(\/(\d+)([,\-]\d+)*|CD\d+)\)/) || // (live $1)/
-			places[i].match(/\(live\) *\/((\d+)([,\-]\d+)*|CD\d+)/)) { // (live \/$1)/
+		// console.log('Match: ', places[i].match(/\(live\) (\/\d+:\d+-\d+)/));
+		// console.log('Match: ', places[i].match(/\(live\) *\( *(\/(\d+)([,-]\d+)*|CD\d+)\)/));
+		// console.log('Match: ', places[i].match(/\(live\) *\/((\d+)([,-]\d+)*|CD\d+)/));
+		//  '(live) ( /01-05)' => '(live /01-05)'
+		while (places[i].match(/\(live\) (\/\d+:\d+-\d+)/) || // (live $1)/
+			places[i].match(/\(live\) *\( *(\/(\d+)([,-]\d+)*|CD\d+)\)/) || // (live $1)/
+			places[i].match(/\(live\) *\/((\d+)([,-]\d+)*|CD\d+)/)) { // (live \/$1)/
 			console.log(' REDO live brackets to: \'places[i]\'\n');
 		}
 	}
 
-	// "ja" tms. tyyppiset normaalin splittauksen poikkeustapaukset:
+	// 'ja' tms. tyyppiset normaalin splittauksen poikkeustapaukset:
 	for (let i = 0; i < places.length; i++) {
 		// Splittaa
 		// 'Helsinki: Liisankadun Studio 19741002 (radio-ohjelma, Yle 2) (live) ( /01-05) ja 19770511 (radio-ohjelma, Yle 2) (live) ( /06-10)' kahdeksi:
 		// 'Helsinki: Liisankadun Studio 19741002 (radio-ohjelma, Yle 2) (live) ( /01-05)
 		// 'Helsinki: Liisankadun Studio 19770511 (radio-ohjelma, Yle 2) (live) ( /06-10)'
 		// console.log('3. For: ', i);
-		// console.log('Match: ', places[i].match(/\d{8}(?: \(.*?\))* \(live \/[0-9,\-]+\) (?:ja|\&)( \d{8}( \(.*?\))? \(live \/[0-9,\-]+\))$/));
+		// console.log('Match: ', places[i].match(/\d{8}(?: \(.*?\))* \(live \/[0-9,-]+\) (?:ja|\&)( \d{8}( \(.*?\))? \(live \/[0-9,-]+\))$/));
 
-		while (places[i].match(/\d{8}(?: \(.*?\))* \(live \/[0-9,\-]+\) (?:ja|\&)( \d{8}( \(.*?\))? \(live \/[0-9,\-]+\))$/)) { // $1/
-			let other_half = '$2'; // $` . $2;
-			// console.log('120 SPLIT //2:\n \'places[i]\' vs\n other_half\n');
-			// console.log('Splice: ', places.splice(i + 1, 0, other_half));
+		while (places[i].match(/\d{8}(?: \(.*?\))* \(live \/[0-9,-]+\) (?:ja|&)( \d{8}( \(.*?\))? \(live \/[0-9,-]+\))$/)) { // $1/
+			console.log('Other half splicing commented 2');
+			// let otherHalf = '$2'; // $` . $2;
+			// console.log('120 SPLIT //2:\n \'places[i]\' vs\n otherHalf\n');
+			// console.log('Splice: ', places.splice(i + 1, 0, otherHalf));
 		}
 
 		// console.log('Match: ', places[i].match(/(.*? \d{8}); (\D+ \d{8}-*)/));
@@ -793,27 +795,28 @@ export function handle120(fonoMap, marcRecord, Logger) {
 		// Aanitteet_2018Q4.txt:120/2:01-2:18).
 		// (liven splitti ei onnistu näillä tiedoilla)
 		if (places[i].match(/(.*? \d{8}); (\D+ \d{8}-*)/)) {
-			let other_half = '$2';
-			// console.log('120 SPLIT //3:\n \'places[i]\' vs\n other_half\n');
-			places.splice(i + 1, 0, other_half);
+			let otherHalf = '$2';
+			// console.log('120 SPLIT //3:\n \'places[i]\' vs\n otherHalf\n');
+			places.splice(i + 1, 0, otherHalf);
 			// console.log('Die...');
 		}
 
-		// console.log('Match: ', places[i].match(/( \d{6} \(live\) \/[0-9,\-]+), (\S+ \d{6} \(live\) \/[0-9,\-]+)/));
+		// console.log('Match: ', places[i].match(/( \d{6} \(live\) \/[0-9,-]+), (\S+ \d{6} \(live\) \/[0-9,-]+)/));
 		// Splittaa Seinäjoki 198006 (live) /09-12, Nivala 198108 (live) /13-16
-		while (places[i].match(/( \d{6} \(live\) \/[0-9,\-]+), (\S+ \d{6} \(live\) \/[0-9,\-]+)/)) { // 1/
-			let other_half = 2;
-			console.log('120 SPLIT //4:\n \'places[i]\' vs\n other_half\n');
-			// places.splice(i + 1, 0, other_half);
+		while (places[i].match(/( \d{6} \(live\) \/[0-9,-]+), (\S+ \d{6} \(live\) \/[0-9,-]+)/)) { // 1/
+			console.log('Other half splicing commented 3');
+			// let otherHalf = 2;
+			// console.log('120 SPLIT //4:\n \'places[i]\' vs\n otherHalf\n');
+			// places.splice(i + 1, 0, otherHalf);
 		}
 
 		// console.log('Match: ', places[i].match(/(: [^:;]+); ([^:;]+: .*)/));
 		// 'Nauvo: Nauvon kirkko; Korppoo: Korppoon kirkko; Parainen: Paraisten kirkko'
 		// 2019-01-15 bugs fixed...
 		if (places[i].match(/(: [^:;]+); ([^:;]+: .*)/)) { // 1/
-			let other_half = 2;
-			// console.log('120 SPLIT //5:\n \'places[i]\' vs\n other_half\n');
-			splaces.splice(i + 1, 0, other_half);
+			let otherHalf = 2;
+			// console.log('120 SPLIT //5:\n \'places[i]\' vs\n otherHalf\n');
+			places.splice(i + 1, 0, otherHalf);
 		}
 	}
 
@@ -821,16 +824,16 @@ export function handle120(fonoMap, marcRecord, Logger) {
 	for (let i = places.length - 1; i >= 0; i--) {
 		// console.log('Cleaning trash, ind: ' + i);
 		if (places[i].match(/^Äänittäjä: *YLE/)) { // Duplicate check?
-			placessplice(i, 1);
+			places.splice(i, 1);
 		}
-		// Place =~ s/\(live\) (\/\d:\d+\-\d+)/(live 1)/;
-		places[i].match(/\(live\) (\/[0-9:,\-]+)/, 'ToDo'); // (live 1)/
+		// Place =~ s/\(live\) (\/\d:\d+-\d+)/(live 1)/;
+		places[i].match(/\(live\) (\/[0-9:,-]+)/, 'ToDo'); // (live 1)/
 		places[i].replace(/Suomi \(Ahvenanmaa\)/, 'Suomi: Ahvenanmaa');
 		places[i].replace(/\(live\s+\)/g, '(live)');
 	}
 
-	// Console.log("---------------------------------")
-	// console.log("Data: ", data120)
+	// Console.log('---------------------------------')
+	// console.log('Data: ', data120)
 	// console.log(data120.match(/\([\w]*\)/))
 
 	// 120Helsinki: Dubrovnik: We Jazz Festival 20151211 (live).
@@ -883,10 +886,10 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // Sub fono120splitter($) {
 // 	my ( $fono120 ) = @_;
 
-// 	print STDERR "DEBUG FONO-120/PLACES: '$fono120'\n";
+// 	print STDERR 'DEBUG FONO-120/PLACES: '$fono120'\n';
 
 // 	if ( $fono120 =~ s/; *äänisuunnittelija: [^\.;:]+(;|$)/$1/ ) {
-// 		print STDERR "Äänisuunnittelija pois, nyt: '$fono120'\n";
+// 		print STDERR 'Äänisuunnittelija pois, nyt: '$fono120'\n';
 // 	}
 
 // 	# Normaali splittaus:
@@ -894,65 +897,65 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	my @places = split(/\)\.\s+/, $fono120);
 
 // 	for ( my $i=0; $i <= $#places; $i++ ) {
-// 	  if( $i < $#places ) { $places[$i] .= ")"; } # palauta splitin "syömä" sulku
+// 	  if( $i < $#places ) { $places[$i] .= ')'; } # palauta splitin 'syömä' sulku
 // 	}
 
 // 	# Pisteelliset normaalin splittauksen poikkeustapaukset
 // 	for ( my $i=0; $i <= $#places; $i++ ) {
-// 		# 2017Q4:ssä nähtiin tapaus, jossa yllä oleva ")."-erotin ei toiminutkaan:
+// 		# 2017Q4:ssä nähtiin tapaus, jossa yllä oleva ').'-erotin ei toiminutkaan:
 
-// 		# "Tshekki: Vizovice: Masters of Rock 20160715 (live) /2:01-19. Tshekki: Vizovice: Masters of Rock 20140711 (live) /3:01-19"
-// 		while ( $places[$i] =~ s/(\/\d+:\d+\-\d+)\.\s+(.*)/$1/ ) {
-// 		my $other_half = $2;
-// 		print STDERR "120 SPLIT #1:\n '$places[$i]' vs\n '$other_half'\n";
-// 		splice(@places, $i+1, 0, $other_half);
+// 		# 'Tshekki: Vizovice: Masters of Rock 20160715 (live) /2:01-19. Tshekki: Vizovice: Masters of Rock 20140711 (live) /3:01-19'
+// 		while ( $places[$i] =~ s/(\/\d+:\d+-\d+)\.\s+(.*)/$1/ ) {
+// 		my $otherHalf = $2;
+// 		print STDERR '120 SPLIT #1:\n '$places[$i]' vs\n '$otherHalf'\n';
+// 		splice(@places, $i+1, 0, $otherHalf);
 // 		}
 // 	}
 
 // 	# siivouksia ennen ja-tyyppiä
 // 	for ( my $i=0; $i <= $#places; $i++ ) {
-// 		#  "(live) ( /01-05)" => "(live /01-05)"
-// 		while ( $places[$i] =~ s/\(live\) (\/\d+:\d+\-\d+)$/(live $1)/ ||
-// 			$places[$i] =~ s/\(live\) *\( *(\/(\d+)([,\-]\d+)*|CD\d+)\)/(live $1)/ ||
-// 			$places[$i] =~ s/\(live\) *\/((\d+)([,\-]\d+)*|CD\d+)/(live \/$1)/ ) {
-// 		print STDERR " REDO live brackets to: '$places[$i]'\n";
+// 		#  '(live) ( /01-05)' => '(live /01-05)'
+// 		while ( $places[$i] =~ s/\(live\) (\/\d+:\d+-\d+)$/(live $1)/ ||
+// 			$places[$i] =~ s/\(live\) *\( *(\/(\d+)([,-]\d+)*|CD\d+)\)/(live $1)/ ||
+// 			$places[$i] =~ s/\(live\) *\/((\d+)([,-]\d+)*|CD\d+)/(live \/$1)/ ) {
+// 		print STDERR ' REDO live brackets to: '$places[$i]'\n';
 // 		}
 // 	}
 
-// 	# "ja" tms. tyyppiset normaalin splittauksen poikkeustapaukset:
+// 	# 'ja' tms. tyyppiset normaalin splittauksen poikkeustapaukset:
 // 	for ( my $i=0; $i <= $#places; $i++ ) {
 // 	  # Splittaa
 // 	  # 'Helsinki: Liisankadun Studio 19741002 (radio-ohjelma, Yle 2) (live) ( /01-05) ja 19770511 (radio-ohjelma, Yle 2) (live) ( /06-10)' kahdeksi:
 // 	  # 'Helsinki: Liisankadun Studio 19741002 (radio-ohjelma, Yle 2) (live) ( /01-05)
 // 	  # 'Helsinki: Liisankadun Studio 19770511 (radio-ohjelma, Yle 2) (live) ( /06-10)'
 
-// 	  while ( $places[$i] =~ s/( \d{8}(?: \(.*?\))* \(live \/[0-9,\-]+\)) (?:ja|\&)( \d{8}( \(.*?\))? \(live \/[0-9,\-]+\))$/$1/ ) {
-// 		my $other_half = $` . $2;
-// 		print STDERR "120 SPLIT #2:\n '$places[$i]' vs\n $other_half\n";
-// 		splice(@places, $i+1, 0, $other_half);
+// 	  while ( $places[$i] =~ s/( \d{8}(?: \(.*?\))* \(live \/[0-9,-]+\)) (?:ja|\&)( \d{8}( \(.*?\))? \(live \/[0-9,-]+\))$/$1/ ) {
+// 		my $otherHalf = $` . $2;
+// 		print STDERR '120 SPLIT #2:\n '$places[$i]' vs\n $otherHalf\n';
+// 		splice(@places, $i+1, 0, $otherHalf);
 // 	  }
 // 	  #Aanitteet_2018Q4.txt:120Seinäjoki: Rytmikorjaamo 20161028; Tampere: Pakkahuone 20161029 (live
 // 	  #Aanitteet_2018Q4.txt:120/2:01-2:18).
 // 	  # (liven splitti ei onnistu näillä tiedoilla)
 // 	  if ( $places[$i] =~ s/(.*? \d{8}); (\D+ \d{8}-*)$/$1/ ) {
-// 		my $other_half = $2;
-// 		print STDERR "120 SPLIT #3:\n '$places[$i]' vs\n $other_half\n";
-// 		splice(@places, $i+1, 0, $other_half);
+// 		my $otherHalf = $2;
+// 		print STDERR '120 SPLIT #3:\n '$places[$i]' vs\n $otherHalf\n';
+// 		splice(@places, $i+1, 0, $otherHalf);
 // 		die();
 // 	  }
 
 // 	  # splittaa Seinäjoki 198006 (live) /09-12, Nivala 198108 (live) /13-16
-// 	  while (  $places[$i] =~ s/( \d{6} \(live\) \/[0-9,\-]+), (\S+ \d{6} \(live\) \/[0-9,\-]+)$/$1/ ) {
-// 		my $other_half = $2;
-// 		print STDERR "120 SPLIT #4:\n '$places[$i]' vs\n $other_half\n";
-// 		splice(@places, $i+1, 0, $other_half);
+// 	  while (  $places[$i] =~ s/( \d{6} \(live\) \/[0-9,-]+), (\S+ \d{6} \(live\) \/[0-9,-]+)$/$1/ ) {
+// 		my $otherHalf = $2;
+// 		print STDERR '120 SPLIT #4:\n '$places[$i]' vs\n $otherHalf\n';
+// 		splice(@places, $i+1, 0, $otherHalf);
 // 	  }
 // 	  # 'Nauvo: Nauvon kirkko; Korppoo: Korppoon kirkko; Parainen: Paraisten kirkko'
 // 	  # 2019-01-15 bugs fixed...
 // 	  if ( $places[$i] =~ s/(: [^:;]+); ([^:;]+: .*)$/$1/ ) {
-// 		my $other_half = $2;
-// 		print STDERR "120 SPLIT #5:\n '$places[$i]' vs\n $other_half\n";
-// 		splice(@places, $i+1, 0, $other_half);
+// 		my $otherHalf = $2;
+// 		print STDERR '120 SPLIT #5:\n '$places[$i]' vs\n $otherHalf\n';
+// 		splice(@places, $i+1, 0, $otherHalf);
 // 	  }
 // 	}
 
@@ -961,8 +964,8 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	  if ( $places[$i] =~ /^Äänittäjä: *YLE$/ ) {
 // 		splice(@places, $i, 1);
 // 	  }
-// 	  #$place =~ s/\(live\) (\/\d:\d+\-\d+)$/(live $1)/;
-// 	  $places[$i] =~ s/\(live\) (\/[0-9:,\-]+)$/(live $1)/;
+// 	  #$place =~ s/\(live\) (\/\d:\d+-\d+)$/(live $1)/;
+// 	  $places[$i] =~ s/\(live\) (\/[0-9:,-]+)$/(live $1)/;
 // 	  $places[$i] =~ s/Suomi \(Ahvenanmaa\)/Suomi: Ahvenanmaa/;
 // 	  $places[$i] =~ s/\(live\s+\)/(live)/g;
 // 	}
@@ -975,7 +978,7 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // sub fono120splitter2($$) {
 // 	my ( $recMarc, $place ) = @_;
 // 	my $orig_place = $place;
-// 	print STDERR "DEBUG PLACE WP1 '$place'\n";
+// 	print STDERR 'DEBUG PLACE WP1 '$place'\n';
 
 // 	my $f033ind2 = '';
 
@@ -995,13 +998,13 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	###########################
 // 	## Käsittele live-tieto: ##
 // 	###########################
-// 	my $prefix = "";
+// 	my $prefix = '';
 // 	my $live = '';
 // 	my $raidat = '';
 // 	my $progtype = '';
 
 // 	if ( $place =~ s/ (\(live: ([^\/\)]+)\))/ (live)/ ) {
-// 	  print STDERR " Karsitaan Fono 120:n osa: '$1' => '$2'\n";
+// 	  print STDERR ' Karsitaan Fono 120:n osa: '$1' => '$2'\n';
 // 	}
 
 // 	my $carry_on = 1;
@@ -1009,7 +1012,7 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	  $carry_on = 0;
 
 // 	  # Muut sulut (täytyy tehdä vaikeamman kautta jos näitä on useampia...)
-// 	  if ( $place =~ s/ *\((Kansansinfoniakonsertti \d+|radiolähetys|radio\-ohjelma|suora radiolähetys|tv-ohjelma, Yleisradio)\)$// ) {
+// 	  if ( $place =~ s/ *\((Kansansinfoniakonsertti \d+|radiolähetys|radio-ohjelma|suora radiolähetys|tv-ohjelma, Yleisradio)\)$// ) {
 // 		if ( $progtype ) { die(); }
 // 		$progtype = $1; # => 518$o Other event information
 // 		$carry_on = 1;
@@ -1018,10 +1021,10 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 		if ( $progtype ) { die(); }
 // 		if ( $prefix ) { die(); }
 // 		$progtype = 'radiolähetys';
-// 		$prefix = "Livetaltiointi";
+// 		$prefix = 'Livetaltiointi';
 // 		$carry_on = 1;
 // 	  }
-// 	  # "Helsinki: Sibelius-viikko 19560612 (radiolähetys 19561009) (live)"
+// 	  # 'Helsinki: Sibelius-viikko 19560612 (radiolähetys 19561009) (live)'
 // 	  # Tässä hukataan lähetyksen ajankohta, mutta esitysajankohta/nauhoitusaika
 // 	  # jäänee talteen...
 // 	  elsif ( $place =~ s/([0-9]{8}(.*\S)*) *\(radiolähetys [0-9]{8}\)$/$1/ ) {
@@ -1033,40 +1036,40 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 		if ( $progtype ) { die(); }
 // 		$progtype = $1;
 // 	  }
-// 	  elsif ( $place =~ s/ *\((live|osittain live) ?\/([0-9:\-,]+|[AB[0-9]+|CD\d+)\)$//i ) {
+// 	  elsif ( $place =~ s/ *\((live|osittain live) ?\/([0-9:-,]+|[AB[0-9]+|CD\d+)\)$//i ) {
 // 		if ( $live || $raidat ) { die(); }
-// 		$live = "(".$1.")";
+// 		$live = '('.$1.')';
 // 		$raidat = $2;
 // 		$carry_on = 1;
 // 	  }
 // 	  elsif ( $place =~ s/ \(live ($yyyy_regexp$mm_regexp)\)$/ $1/) {
 // 		if ( $live ) { die(); }
-// 		$live = "(live)";
+// 		$live = '(live)';
 // 	  }
 // 	  elsif ( $place =~ s/ *\((live|osittain live) \/(mahdollisesti)\)$//i ) {
 // 		if ( $live ) { die(); }
-// 		$live = "(".$1.")";
+// 		$live = '('.$1.')';
 // 		$carry_on = 1;
 // 	  }
 // 	  elsif ( $place =~ s/ *\((live|osittain live) \/(soundcheck)\)$//i ) {
 // 		if ( $live || $progtype ) { die(); }
-// 		$live = "(".$1.")";
+// 		$live = '('.$1.')';
 // 		$progtype = $2;
 // 		$carry_on = 1;
 // 	  }
 // 	  elsif ( $place =~ s/ *\((live|osittain live|live \/osittain)\)$//i ) {
 // 		my $tmp = $1;
-// 		if ( $tmp eq "live /osittain" ) { $tmp = "osittain live"; }
-// 		$live = "(".$tmp.")";
+// 		if ( $tmp eq 'live /osittain' ) { $tmp = 'osittain live'; }
+// 		$live = '('.$tmp.')';
 // 		$carry_on = 1;
 // 	  }
-// 	  # "Sveitsi: Geneve: Festival Jazz Contre Band 2016: AMR (Association pour l'encouragement de la musique improvisee) 20161017-18"
-// 	  elsif ( 0 && $place =~ /^[^\(]*[A-Z] \([^\)0-9]+\) \d+(\-\d+)?$/ ) {
+// 	  # 'Sveitsi: Geneve: Festival Jazz Contre Band 2016: AMR (Association pour l'encouragement de la musique improvisee) 20161017-18'
+// 	  elsif ( 0 && $place =~ /^[^\(]*[A-Z] \([^\)0-9]+\) \d+(-\d+)?$/ ) {
 // 		# ignoroi aukikirjoitettu lyhenne
 // 	  }
 // 	  #elsif ( $place =~ s/ (\([A-Za-z ]+ \/[1-9]\. palkinto\))$// ) {
 // 	  elsif ( $place =~ s/( \([A-Za-z ]+ [0-9]{4} \/[1-9]\. palkinto\))$// ) {
-// 		print STDERR "NB! ignoroitiin '$1'\n";
+// 		print STDERR 'NB! ignoroitiin '$1'\n';
 // 		$carry_on = 1;
 // 	  }
 // 	}
@@ -1075,7 +1078,7 @@ export function handle120(fonoMap, marcRecord, Logger) {
 
 // 	if ( $place =~ /\(/ && $place !~ /[0-9]{4}$/ ) {
 // 	  if ( $place !~ /^[^\(]*\(Ayers rock\)[^\)]*$/ ) {
-// 		print STDERR "TODO: Selvitä sulku: '$place'/'", $orig_place, "'\n";
+// 		print STDERR 'TODO: Selvitä sulku: '$place'/'', $orig_place, ''\n';
 // 		die();
 // 	  }
 // 	}
@@ -1085,33 +1088,33 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	# KS 9.9.2016: Äänitys + (live) => Livetaltiointi
 // 	if ( $prefix eq 'Äänitys' && $live ne '' ) {
 // 	  if ( $live eq '(live)' ) {
-// 		$prefix = "Livetaltiointi";
+// 		$prefix = 'Livetaltiointi';
 // 		$live = '';
 // 	  }
-// 	  elsif ( $live eq "(live /soundcheck)" ) {
-// 		$prefix = "Livetaltiointi (soundcheck)";
+// 	  elsif ( $live eq '(live /soundcheck)' ) {
+// 		$prefix = 'Livetaltiointi (soundcheck)';
 // 		$live = '';
 // 	  }
-// 	  elsif ( $live eq "(osittain live)" ) {
+// 	  elsif ( $live eq '(osittain live)' ) {
 // 		# OK. Älä muuta mitään.
 // 	  }
 // 	  else {
-// 		print STDERR "LIVE TODO $prefix/$live";
+// 		print STDERR 'LIVE TODO $prefix/$live';
 // 		die();
 // 	  }
 // 	}
 
-// 	print STDERR "DEBUG PLACE WP2 '$place'\n";
+// 	print STDERR 'DEBUG PLACE WP2 '$place'\n';
 
-// 	# I: "Suomi, Englanti (UK) /orkesteri-osuus; kuoro-osuus"
-// 	# => "Suomi, Englanti (UK)"
+// 	# I: 'Suomi, Englanti (UK) /orkesteri-osuus; kuoro-osuus'
+// 	# => 'Suomi, Englanti (UK)'
 // 	if ( $place =~ /\/ura/ ) { die($place); }
 // 	if ( $place =~ s/ \/(.*)$// ) {
-// 	  print STDERR "DEBUG 120: kommentti pois: $1\n";
+// 	  print STDERR 'DEBUG 120: kommentti pois: $1\n';
 
 // 	}
 // 	if ( $place =~ /(;|nisuunnittelija)/ ) {
-// 	  die("120 needs rethinking: $place\n");
+// 	  die('120 needs rethinking: $place\n');
 // 	}
 
 // 	# Yritetään poimia vuosilukuja Fonon 120-kentästä
@@ -1121,7 +1124,7 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	$place =~ s/ ja\/tai: / ja\/tai /g; # Fono2018Q2
 
 // 	# Multiple single dates (IND2=1)
-// 	# " ja: " oli 2016Q2-datassa.
+// 	# ' ja: ' oli 2016Q2-datassa.
 
 // 	if ( $place =~ s/(?:^| )(\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])(, | ja +| tai | *\& *)(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])( \([^\)]+\))?$/$8/ ) {
 // 	  my $y1 = $1;
@@ -1132,13 +1135,13 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	  my $m2 = $6;
 // 	  my $d2 = $7;
 
-// 	  my $a1 = "$y1$m1$d1";
-// 	  my $a2 = "$y2$m2$d2";
+// 	  my $a1 = '$y1$m1$d1';
+// 	  my $a2 = '$y2$m2$d2';
 
-// 	  $year120 = "$d1.$m1.$y1$sep$d2.$m2.$y2";
+// 	  $year120 = '$d1.$m1.$y1$sep$d2.$m2.$y2';
 // 	  $year120 =~ s/(^|\.)0(\d)/$1$2/g; # Nollat pois päivämäärän alusta
 
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2\n";
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '1', '0', a => $a1, a => $a2));
 // 	}
 // 	# 20170919,23,30
@@ -1149,34 +1152,34 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	  my $d2 = $4;
 // 	  my $d3 = $5;
 
-// 	  my $a1 = "$yyyy$mm$d1";
-// 	  my $a2 = "$yyyy$mm$d2";
-// 	  my $a3 = "$yyyy$mm$d3";
+// 	  my $a1 = '$yyyy$mm$d1';
+// 	  my $a2 = '$yyyy$mm$d2';
+// 	  my $a3 = '$yyyy$mm$d3';
 
-// 	  $year120 = "$d1.$mm.$yyyy, $d2.$mm.$yyyy, $d3.$mm.$yyyy"; # aika tuskainen
+// 	  $year120 = '$d1.$mm.$yyyy, $d2.$mm.$yyyy, $d3.$mm.$yyyy'; # aika tuskainen
 // 	  $year120 =~ s/(^|\.)0(\d)/$1$2/g; # Nollat pois päivämäärän alusta
 
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2 \$ $a3\n";
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2 \$ $a3\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '1', '0', a => $a1, a => $a2, a => $a3));
 // 	}
 // 	# 2016Q3: 'Amsterdam: Concertgebouw: 2013&2015'
 // 	elsif ( $place =~ s/(?:^| )([12]\d{3})(\&)([12]\d{3})$// ) { # YYYY&YYYY
-// 	  $year120 = "$1$2$3";
-// 	  my $a1 = "$1----";
-// 	  my $a2 = "$3----";
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2\n";
+// 	  $year120 = '$1$2$3';
+// 	  my $a1 = '$1----';
+// 	  my $a2 = '$3----';
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '1', '0', a => $a1, a => $a2));
 // 	}
 // 	elsif ( $place =~ s/(?:^| )((?:19[0-9][0-9]|20[0-2][0-9])(?:0[1-9]|1[012]))(\&)([12]\d{3}(?:0[1-9]|1[012]))$// ) { # YYYYMM&YYYYMM
-// 	  $year120 = "$1$2$3";
-// 	  my $a1 = "$1--";
-// 	  my $a2 = "$3--";
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2\n";
+// 	  $year120 = '$1$2$3';
+// 	  my $a1 = '$1--';
+// 	  my $a2 = '$3--';
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '1', '0', a => $a1, a => $a2));
 // 	}
-// 	elsif ( $place =~ s/(?:^| )([12]\d{3})(0[1-9]|1[012])( *\& *| *\- *)([12]\d{3})(0[1-9]|1[012])$// ) { # YYYYMM&YYYYMM, YYYYMM-YYYYMM
-// 	  my $a1 = "$1$2--";
-// 	  my $a2 = "$4$5--";
+// 	elsif ( $place =~ s/(?:^| )([12]\d{3})(0[1-9]|1[012])( *\& *| *- *)([12]\d{3})(0[1-9]|1[012])$// ) { # YYYYMM&YYYYMM, YYYYMM-YYYYMM
+// 	  my $a1 = '$1$2--';
+// 	  my $a2 = '$4$5--';
 
 // 	  my $y1 = $1;
 // 	  my $m1 = $2;
@@ -1188,83 +1191,83 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	  my $m1name = int2finnish_month_name($m1);
 // 	  my $m2name = int2finnish_month_name($m2);
 
-// 	  $year120 = "$m1name $y1 $separator $m2name $y2";
+// 	  $year120 = '$m1name $y1 $separator $m2name $y2';
 
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2\n";
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', $ind2, '0', a => $a1, a => $a2));
 // 	}
-// 	elsif ( $place =~ s/(?:^| )(0[1-9]|1[012])([12]\d{3})( *\& *| *\- *)(0[1-9]|1[012])([12]\d{3})$// ) { # MMYYYY&MMYYYY, MMYYYY-MMYYYY
+// 	elsif ( $place =~ s/(?:^| )(0[1-9]|1[012])([12]\d{3})( *\& *| *- *)(0[1-9]|1[012])([12]\d{3})$// ) { # MMYYYY&MMYYYY, MMYYYY-MMYYYY
 // 	  my $m1 = $1;
 // 	  my $y1 = $2;
 // 	  my $separator = $3;
 // 	  my $m2 = $4;
 // 	  my $y2 = $5;
 
-// 	  my $a1 = "$y1$m1--";
-// 	  my $a2 = "$y2$m2--";
+// 	  my $a1 = '$y1$m1--';
+// 	  my $a2 = '$y2$m2--';
 
 // 	  my $ind2 = separator2indicator2($separator);
 
 // 	  my $m1name = int2finnish_month_name($m1);
 // 	  my $m2name = int2finnish_month_name($m2);
 
-// 	  $year120 = "$m1name $y1 $separator $m2name $y2";
+// 	  $year120 = '$m1name $y1 $separator $m2name $y2';
 
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2\n";
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', $ind2, '0', a => $a1, a => $a2));
 // 	}
 
 // 	elsif ( $place =~ s/(?:^| )(\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])( ja | tai | *\& *)(0[1-9]|[12][0-9]|3[01])$// ) {
-// 	  $year120 = "$3.$2.$1$4$5.$2.$1";
-// 	  my $a1 = "$1$2$3";
-// 	  my $a2 = "$1$2$5";
-// 	  print STDERR "033 1 : \$a $a1 \$a $a2\n";
+// 	  $year120 = '$3.$2.$1$4$5.$2.$1';
+// 	  my $a1 = '$1$2$3';
+// 	  my $a2 = '$1$2$5';
+// 	  print STDERR '033 1 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '1', '0', a => $a1, a => $a2));
 // 	}
 // 	# Range of dates (IND2=2)
-// 	elsif ( $place =~ s/ (\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])\-(\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$// ) {
-// 	  $year120 = "$3.$2.$1-$6.$5.$4";
-// 	  my $a1 = "$1$2$3";
-// 	  my $a2 = "$4$5$6";
-// 	  print STDERR "033 2 : \$a $a1 \$a $a2\n";
+// 	elsif ( $place =~ s/ (\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-(\d{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$// ) {
+// 	  $year120 = '$3.$2.$1-$6.$5.$4';
+// 	  my $a1 = '$1$2$3';
+// 	  my $a2 = '$4$5$6';
+// 	  print STDERR '033 2 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '2', '0', a => $a1, a => $a2));
 // 	}
 // 	# YYYYMMDD-MMDD
-// 	elsif ( $place =~ s/(?:^| )([12]\d{3})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])\-(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$// ) {
-// 	  $year120 = "$3.$2.-$5.$4.$1";
-// 	  my $a1 = "$1$2$3";
-// 	  my $a2 = "$1$4$5";
-// 	  print STDERR "033 2 : \$a $a1 \$a $a2\n";
+// 	elsif ( $place =~ s/(?:^| )([12]\d{3})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$// ) {
+// 	  $year120 = '$3.$2.-$5.$4.$1';
+// 	  my $a1 = '$1$2$3';
+// 	  my $a2 = '$1$4$5';
+// 	  print STDERR '033 2 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '2', '0', a => $a1, a => $a2));
 // 	}
 // 	# YYYYMMDD-DD
-// 	elsif ( $place =~ s/(?:^| )([12]\d{3})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])\-(0[1-9]|[12][0-9]|3[01])$// ) {
-// 	  $year120 = "$3.-$4.$2.$1";
-// 	  my $a1 = "$1$2$3";
-// 	  my $a2 = "$1$2$4";
-// 	  print STDERR "033 2 : \$a $a1 \$a $a2\n";
+// 	elsif ( $place =~ s/(?:^| )([12]\d{3})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-(0[1-9]|[12][0-9]|3[01])$// ) {
+// 	  $year120 = '$3.-$4.$2.$1';
+// 	  my $a1 = '$1$2$3';
+// 	  my $a2 = '$1$2$4';
+// 	  print STDERR '033 2 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '2', '0', a => $a1, a => $a2));
 // 	}
 // 	# YYYYMM-MM
-// 	elsif ( $place =~ s/(?:^| )(19[0-9][0-9]|20[0-9][0-9])(0[1-9]|1[012])\-(0[1-9]|1[012])$// ) {
+// 	elsif ( $place =~ s/(?:^| )(19[0-9][0-9]|20[0-9][0-9])(0[1-9]|1[012])-(0[1-9]|1[012])$// ) {
 // 	  my $y = $1;
 // 	  my $m1 = $2;
 // 	  my $m2 = $3;
 // 	  my $m1name = int2finnish_month_name($m1);
 // 	  my $m2name = int2finnish_month_name($m2);
-// 	  $year120 = "$m1name $y - $m2name $y";
-// 	  my $a1 = "$y${m1}--"; # '-' means unknown
-// 	  my $a2 = "$y${m2}--";
-// 	  print STDERR "Y120\t$year120\n";
-// 	  print STDERR "033\t2 : \$a $a1 \$a $a2\n";
+// 	  $year120 = '$m1name $y - $m2name $y';
+// 	  my $a1 = '$y${m1}--'; # '-' means unknown
+// 	  my $a2 = '$y${m2}--';
+// 	  print STDERR 'Y120\t$year120\n';
+// 	  print STDERR '033\t2 : \$a $a1 \$a $a2\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '2', '0', a => $a1, a => $a2));
 // 	}
 
 // 	## Single date
 // 	elsif ( $place =~ s/(?:^| )(19[0-9][0-9]|20\d{2})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])$// ) { # YYYYMMDD
-// 	  $year120 = "$3.$2.$1";
-// 	  my $f033a = "$1$2$3";
-// 	  print STDERR "033 0 : \$a $f033a\n";
+// 	  $year120 = '$3.$2.$1';
+// 	  my $f033a = '$1$2$3';
+// 	  print STDERR '033 0 : \$a $f033a\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '0', '0', a => $f033a));
 // 	}
 // 	elsif ( $place =~ s/(?:^| )(19[0-9][0-9]|20[01][0-9])(0[1-9]|1[012])$// ) {
@@ -1273,48 +1276,48 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 	  # Regexpiä tiukennettu 20181015.
 // 	  my $y = $1;
 // 	  my $m = $2;
-// 	  my $f033a = "$y${m}--";
+// 	  my $f033a = '$y${m}--';
 
-// 	  # $year120 = "$3.$2.$1";
+// 	  # $year120 = '$3.$2.$1';
 
 // 	  my $mname = int2finnish_month_name($m);
-// 	  $year120 = "$mname $y";
-// 	  print STDERR "033 0 : \$a $f033a\n";
+// 	  $year120 = '$mname $y';
+// 	  print STDERR '033 0 : \$a $f033a\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '0', '0', a => $f033a));
 // 	}
 // 	elsif ( $place =~ s/(?:^| )(0[1-9]|1[012])(20[01][0-9])$// ) { # MMYYYY
 // 	  # Nähty 2018Q3:ssa ekan kerran. YYYYMM on normaali.
 // 	  my $y = $2;
 // 	  my $m = $1;
-// 	  my $f033a = "$y${m}--";
+// 	  my $f033a = '$y${m}--';
 // 	  my $mname = int2finnish_month_name($m);
-// 	  $year120 = "$mname $y";
-// 	  print STDERR "033 0 : \$a $f033a\n";
+// 	  $year120 = '$mname $y';
+// 	  print STDERR '033 0 : \$a $f033a\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '0', '0', a => $f033a));
 // 	}
 // 	elsif ( $place =~ s/(?:^| )([12]\d{3})$// ) { # YYYY
-// 	  $year120 = "$1";
-// 	  my $f033a = "$1----";
-// 	  print STDERR "033 0 : \$a $f033a\n";
+// 	  $year120 = '$1';
+// 	  my $f033a = '$1----';
+// 	  print STDERR '033 0 : \$a $f033a\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '0', '0', a => $f033a));
 // 	}
-// 	elsif ( $place =~ s/ (\d{4})$// || $place =~ s/ (\d{4}\-\d{4})$// ) {
+// 	elsif ( $place =~ s/ (\d{4})$// || $place =~ s/ (\d{4}-\d{4})$// ) {
 // 	  $year120 = $1;
 // 	}
-// 	elsif ( $yq eq "2017Q3" && $place =~ s/^(2007102007)$// ) { # ugly hack
-// 	  $year120 = "13.10.2007";
-// 	  my $f033a = "20071013";
-// 	  print STDERR "033 0 : \$a $f033a\n";
+// 	elsif ( $yq eq '2017Q3' && $place =~ s/^(2007102007)$// ) { # ugly hack
+// 	  $year120 = '13.10.2007';
+// 	  my $f033a = '20071013';
+// 	  print STDERR '033 0 : \$a $f033a\n';
 // 	  $recMarc->insert_fields_ordered(MARC::Field->new('033', '0', '0', a => $f033a));
 // 	}
 
 // 	elsif ( $place =~ s/(^| )(20\d\d\?)$// ) {
-// 		print STDERR " NB! Skip Fono 120 data '$2'\n";
+// 		print STDERR ' NB! Skip Fono 120 data '$2'\n';
 // 	}
 // 	elsif ( $place =~ /\d{4}/ ) {
 // 	  # we wanto to debug this further...
-// 	  print STDERR "TODO PLACE '$place'\n";
-// 	  die("PLACE: '$place'");
+// 	  print STDERR 'TODO PLACE '$place'\n';
+// 	  die('PLACE: '$place'');
 // 	}
 // 	elsif ( $place =~ /[\/\(\)]/ ) {
 // 	  # debug further...
@@ -1322,12 +1325,12 @@ export function handle120(fonoMap, marcRecord, Logger) {
 // 		# do nothing
 // 	  }
 // 	  else {
-// 		print STDERR "TODO PLACE '$place'\n";
-// 		die("PLACE: '$place'");
+// 		print STDERR 'TODO PLACE '$place'\n';
+// 		die('PLACE: '$place'');
 // 	  }
 // 	}
 // 	if ( $place =~ / (ja|tai):?$/ ) {
-// 	  die("$place/$year120");
+// 	  die('$place/$year120');
 // 	}
 // 	$place =~ s/^([^:]+): ([^:]+|S:t [^:]+): ([^:]+)$/$1, $2, $3/i;
 // 	$place =~ s/^([^:]+): ([^:]+|S:t [^:]+)$/$1, $2/i;
@@ -1335,7 +1338,7 @@ export function handle120(fonoMap, marcRecord, Logger) {
 
 // 	if ( $raidat ) {
 // 	  my $etuliite =  ( $raidat =~ /^\d+$/ ? 'Raita' : 'Raidat' );
-// 	  $raidat = "$etuliite $raidat";
+// 	  $raidat = '$etuliite $raidat';
 // 	}
 
 // 	return ( $recMarc, $prefix, $place, $live, $year120, $progtype, $raidat );
@@ -1389,15 +1392,24 @@ export function handle130(fonoMap, marcRecord, Logger) {
 		}
 
 		if (ind === 0) {
+			if (line.length > 1) {
+				line = line.substr(0, 1) + line.substr(1).toLowerCase();
+			}
+
+			// Toinen ja seuraavat rivit 245 osakenttään $b. Jos $b on elemassa, niin 245$a:n loppuun ':'. muuten '.'.
+			if (data130.length > 1) {
+				line += ':';
+			} else {
+				line += '.';
+			}
+
 			if (fonoMap.main()) {
 				// Emo: eka rivi 245 00 $a pienaakkosilla – ks. Artikkeleiden ohitus
-				tag.subfields.push({code: 'a', value: line.toLowerCase()});
-				// Emo: lisätään aina 245 $a-kentän jälkeen $h [Äänite]
-				tag.subfields.push({code: 'h', value: '[Äänite]'});
+				tag.subfields.push({code: 'a', value: line});
 			} else {
 				// Osakohteet: 773 $t – vain eka rivi pienaakkosilla
 				tag.tag = '773';
-				tag.subfields.push({code: 't', value: line.toLowerCase()});
+				tag.subfields.push({code: 't', value: line}); // ToDo: in expected 'Queen of hell. - '
 			}
 		} else {
 			// Toinen ja seuraavat rivit 245 osakenttään $b, osakenttää $b edeltää tyhjämerkki, kaksoispiste, tyhjämerkki ( : )
@@ -1410,7 +1422,7 @@ export function handle130(fonoMap, marcRecord, Logger) {
 
 // ToDO: Viola implementation
 // NVOLK: nykyään nuo aukikirjoitetaan: säv. → säveltäjä jne (loppupisteen olemassaolo riippuu kontekstista)
-// NVOLK: Huom. Fono ei kerro, onko kysessä ihminen vai yhteisötekijä (eli suomeksi tässä kontekstissa käytännössä aina yhtye). Jos nimi löytyy Violan tekijäauktoriteettitietueista, niin silloin käytetään sen mukaista tulkintaa. Muuten valistunut arvaus. (Esim. "the" tai yksisananinen tekijä indikoi yleensä yhtyettä,)
+// NVOLK: Huom. Fono ei kerro, onko kysessä ihminen vai yhteisötekijä (eli suomeksi tässä kontekstissa käytännössä aina yhtye). Jos nimi löytyy Violan tekijäauktoriteettitietueista, niin silloin käytetään sen mukaista tulkintaa. Muuten valistunut arvaus. (Esim. 'the' tai yksisananinen tekijä indikoi yleensä yhtyettä,)
 // NVOLK: Fonon nimiä (ja elinvuosia) verrataan Violan tekijäauktoriteettitietuiden nimiin ja salanimiin/taiteilijanimiin. Tarvittaessa Fonosta tuleva nimi vaihdetaan Violaan auktoriteettitietueen 1X0-kentän nimeen. (Esim. jos Fonon nimi löytyy vain auktoriteettitietueen 400-kentässä, niin saatetaankin käyttää auktoriteettitietueen 100-kentässä olevaa nimeä luotavassa tietueessa.)
 // NVOLK: Lisäksi noihin luotaviin tietueisiin on takautuvassa ajossa lisätty tekijöille elinvuodet. Tän varmaan voi toteuttaa Melindassa jotenkin fiksummin.
 // Kentästä voidaan saada myös Musiikin esityskokoonpano -tietoa kenttään 500, ja jotain Kansansävelmä-tietoa kenttään 381.
@@ -1425,7 +1437,7 @@ export function handle140(fonoMap, marcRecord, Logger) {
 	}
 
 	// * Henkilönnimistä pois syntymä- ja kuolinvuodet, esim. Mancini, Henry [1924-1994] (säv) -> 700 1# $a Mancini, Henry, $e säveltäjä.
-	let data = data140.replace(/(\[[\d\-\s]*\])/g, '');
+	let data = data140.replace(/(\[[\d-\s]*\])/g, '');
 	// * Nimen jälkeinen /pseud/ pois
 	data = data.replace(/(\/pseud\s\/)/g, '');
 
@@ -1439,7 +1451,7 @@ export function handle140(fonoMap, marcRecord, Logger) {
 		}
 
 		// Split by parenthesis, but not with pseudonym explanation
-		let elements = person.split(/(\([^\=].*\))/).filter(n => n);
+		let elements = person.split(/(\([^=].*\))/).filter(n => n);
 		if (elements.length > 2) {
 			Logger.log('error', `140 field: ppl has more than two components: ${elements}`);
 			return;
@@ -1451,13 +1463,15 @@ export function handle140(fonoMap, marcRecord, Logger) {
 		}
 
 		let name = elements[0].replace(/(^\s+)|(\s+$)/g, ''); // Remove whitespaces from start and end of name
-		let comma = name.match(/^[^\(]+\,[^\(]+/);
+		let comma = name.match(/^[^(]+,[^(]+/);
 		let functions = null;
 		if (elements.length === 2) {
 			functions = elements[1].match(/(säv)|(san)|(sov)|(esitt)/gi);
 		}
 
-		if (functions !== null) {
+		if (functions === null) {
+			marcRecord.insertField(getField());
+		} else {
 			functions.forEach(func => {
 				let field = getField(func);
 
@@ -1468,8 +1482,6 @@ export function handle140(fonoMap, marcRecord, Logger) {
 					marcRecord.insertField(field);
 				}
 			});
-		} else {
-			marcRecord.insertField(getField());
 		}
 
 		function getField(func) {
@@ -1494,7 +1506,7 @@ export function handle140(fonoMap, marcRecord, Logger) {
 			if (fonoMap.main()) {
 				// Jos Fonon 001/170:ssa L1 (=taidemusiikki), ensimmäinen nimi ->
 				// 100 1# $a nnn, nnn, $e säv.
-				if (ind === 0 && (data001 && data001.match(/L1/g)) || (data001 && data170.match(/L1/g))) {
+				if (ind === 0 && ((data001 && data001.match(/L1/g)) || (data001 && data170.match(/L1/g)))) {
 					return {
 						tag: '100',
 						ind1: '1',
@@ -1635,6 +1647,9 @@ export function handle141(fonoMap, marcRecord, Logger) {
 // *********************
 
 // ToDo: inconsistency with 505 and 245
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// TODO - Do this!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 export function handle150(fonoMap, marcRecord, Logger) {
 	let data150 = fonoMap.getAllCombined('150');
 	if (data150 === false) {
@@ -1655,15 +1670,30 @@ export function handle150(fonoMap, marcRecord, Logger) {
 
 	// jos sulkeet ja yhtäläisyysmerkki (=) -> = 245 $b, sulkeet ja = pois
 	// jos sulkeet ilman = ja - -> 500 ## $a, sulkeet pois, iso alkukirjain
-	if (fonoMap.main()) {
 
+	// if (fonoMap.main()) {
 	// Osakohteet
 	// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
 	// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
 	// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
-	} else {
+	// }
 
-	}
+	// 505 0_ $a xxxx ; xxxx ; xxxx.
+	// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
+	// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
+	// ToDo: jos kenttä on jo muodostettu 150-kentästä, tämä sen jatkoksi – harvinaista
+	let data = data150.replace(/\.\s{2}/g, ' ; ');
+	data = data.replace(/\.$/, '');
+
+	marcRecord.insertField({
+		tag: '505',
+		ind1: '0',
+		ind2: '',
+		subfields: [{
+			code: 'a',
+			value: data
+		}]
+	});
 
 	// Emot:
 	// 150Moorland elegies, sarja sekakuorolle ja jousiorkesterille.
@@ -1705,7 +1735,7 @@ export function handle150(fonoMap, marcRecord, Logger) {
 
 	// 500 ## $a etutekstillä: Tekijähuomautus:
 	// data150.forEach(function(line) {
-	// console.log("Line: ", line);
+	// console.log('Line: ', line);
 
 	// marcRecord.insertField({
 	// 	tag: '505',
@@ -1741,26 +1771,10 @@ export function handle151(fonoMap, marcRecord, Logger) {
 	}
 
 	// Emot
-	// 505 0_ $a xxxx ; xxxx ; xxxx.
-	// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
-	// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
-	// ToDo: jos kenttä on jo muodostettu 150-kentästä, tämä sen jatkoksi – harvinaista
-	if (fonoMap.main()) {
-		let data = data151.replace(/\.\s{2}/g, ' ; ');
-		data = data.replace(/\.$/, '');
-
-		marcRecord.insertField({
-			tag: '505',
-			ind1: '',
-			ind2: '',
-			subfields: [{
-				code: 'a',
-				value: data
-			}]
-		});
+	// käsitellään samalla kuin Fonon 150-kenttä
 	// Osakohteet
 	// 500 ## $a sellaisenaan
-	} else {
+	if (!fonoMap.main()) {
 		marcRecord.insertField({
 			tag: '500',
 			ind1: '',
@@ -1786,8 +1800,8 @@ export function handle162(fonoMap, marcRecord, Logger) {
 
 	// These are regex from previous solution: (some capture group filtering missing)
 	// https://github.com/NatLibFi/viola-scripts/blob/master/scripts/fono/fono_to_marc.pl
-	// console.log("first: ", data162.match(/^[^0-9?]?[^0-9?]?([0-9?]{1,4}.+)$/))
-	// console.log("second: ", temp[0].match(/^.*?\b(?:SV)?([12][0-9?]{1,3}).*$/i))
+	// console.log('first: ', data162.match(/^[^0-9?]?[^0-9?]?([0-9?]{1,4}.+)$/))
+	// console.log('second: ', temp[0].match(/^.*?\b(?:SV)?([12][0-9?]{1,3}).*$/i))
 	if (year.length === 1) {
 		marcRecord.insertField({
 			tag: '045',
@@ -1804,7 +1818,7 @@ export function handle162(fonoMap, marcRecord, Logger) {
 }
 
 // 084 ## $a nnn $2 ykl ja/tai 008/18-19 Ks. lajikoodit_korjattu.txt
-// Input: "L4 L4A"
+// Input: 'L4 L4A'
 // 170L4A L6B
 // 170L4A
 // 170L5A
@@ -1905,7 +1919,7 @@ export function handle180(fonoMap, marcRecord, Logger) {
 // Nimeämätön -> ei 700/710
 // ks. Artikkelien ohitus
 
-// Input: "Iron Magazine (yhtye)."
+// Input: 'Iron Magazine (yhtye).'
 
 // Äänitteet
 // 190Maksetut viulut (yhtye).
@@ -1946,7 +1960,7 @@ export function handle190(fonoMap, marcRecord, Logger) {
 	}
 }
 
-// Input: "syntetisaattori)."
+// Input: 'syntetisaattori).'
 // Äänitteet
 // 191Ym.
 // 191Yhtyeen muut jäsenet lueteltu oheislehtisessä.
@@ -1974,13 +1988,12 @@ export function handle191(fonoMap, marcRecord, Logger) {
 
 	if (data191 === false) {
 		Logger.log('info', '191 field: does not exist');
-		return;
+		// return;
 	}
 
 	// POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
-	if (data191.match(/\byleistietodoku/i)) {
-
-	}
+	// if (data191.match(/\byleistietodoku/i)) {
+	// }
 
 	// Samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
 }
@@ -2037,37 +2050,36 @@ export function handle222(fonoMap, marcRecord, Logger, control008) {
 		if (!insertToControl(control008, 7, 4, year[1])) {
 			Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
 		}
+
+	// Jos on 224: 534 ## $p Alun perin julkaistu: $c pyyyy.
+	} else if (fonoMap.exists(224)) {
+		marcRecord.insertField({
+			tag: '534',
+			ind1: '',
+			ind2: '',
+			subfields: [{
+				code: 'p',
+				value: 'Alun perin julkaistu:' + year[1]
+			}, {
+				code: 'c',
+				value: 'p' + year[1]
+			}]
+		});
 	} else {
 		// Osakohteet
 		// 008/07-10 yyyy + 773 $d pyyyy – jos ei kenttää 224
-		if (!fonoMap.exists(224)) {
-			marcRecord.insertField({
-				tag: '773',
-				ind1: '',
-				ind2: '',
-				subfields: [{
-					code: 'd',
-					value: 'p' + year[1]
-				}]
-			});
+		marcRecord.insertField({
+			tag: '773',
+			ind1: '',
+			ind2: '',
+			subfields: [{
+				code: 'd',
+				value: 'p' + year[1]
+			}]
+		});
 
-			if (!insertToControl(control008, 7, 4, year[1])) {
-				Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
-			}
-		} else {
-			// Jos on 224: 534 ## $p Alun perin julkaistu: $c pyyyy.
-			marcRecord.insertField({
-				tag: '534',
-				ind1: '',
-				ind2: '',
-				subfields: [{
-					code: 'p',
-					value: 'Alun perin julkaistu:' + year[1]
-				}, {
-					code: 'c',
-					value: 'p' + year[1]
-				}]
-			});
+		if (!insertToControl(control008, 7, 4, year[1])) {
+			Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
 		}
 	}
 }
@@ -2096,7 +2108,7 @@ export function handle223and225(fonoMap, Logger, control008) {
 	}
 
 	if (matches) {
-		let countryCode = getPubCountry(matches[1]);
+		let countryCode = getPubCountry(matches[1], Logger);
 		if (!insertToControl(control008, 15, 3, countryCode)) {
 			let field = '223';
 			if (fonoMap.exists(225)) {
@@ -2151,7 +2163,7 @@ export function handle224(fonoMap, marcRecord, Logger, control008) {
 
 // 008/07-10 yyyy + 260 ## $c [yyyy?] – jos ei kenttiä 222 tai 224
 // NV: tätä ei enää käytetä
-// Input: "HV2017"
+// Input: 'HV2017'
 // function handle228() {
 // }
 
@@ -2278,6 +2290,7 @@ export function handle244(fonoMap, marcRecord, Logger, control008) {
 	}
 }
 
+// eslint-disable-next-line complexity
 function getGenre(data, Logger) {
 	switch (true) {
 		// [/^L1A\b/ && do { $mr->insert_fields_ordered(MARC::Field->new('084', '', '', a => '78.35', 2 => 'ykl')],
@@ -2333,12 +2346,14 @@ function getGenre(data, Logger) {
 
 		case /^L9E\b/.test(data):
 			return 'mp';
+		default:
+			Logger.log('warn', `getGenre(): genre code ${data} not identified`);
+			return '  ';
 	}
-	Logger.log('warn', `getGenre(): genre code ${data} not identified`);
-	return '  ';
 }
 
-function getPubCountry(input) {
+// eslint-disable-next-line complexity
+function getPubCountry(input, Logger) {
 	switch (input) {
 		case '1000': // Suomi
 		case '1100': // Uusimaa
@@ -2435,6 +2450,9 @@ function getPubCountry(input) {
 			return 'xxu'; // 'Yhdysvallat
 		case '7130':
 			return 'mx'; // Meksiko
+		default:
+			Logger.log('warn', `getPubCountry(): country code ${input} not identified`);
+			return '';
 	}
 }
 
@@ -2498,27 +2516,26 @@ function insertToControl(control, start, length, data) {
 // 	}
 // }
 
-
 async function inputTestData(stream) {
 	let text = await getStream(stream);
-	// console.log("------------------------")
-	// console.log("Inputed text: ")
+	// console.log('------------------------')
+	// console.log('Inputed text: ')
 	// console.log(text)
-	// console.log("------------------------")
+	// console.log('------------------------')
 	let rec = [];
-	rec = text.split(/^\*\*\*+/m).filter(n => n); // Find "***" from start of line and split by it, filter out empty
+	rec = text.split(/^\*\*\*+/m).filter(n => n); // Find '***' from start of line and split by it, filter out empty
 	return rec;
 }
 
 // Function streamToString (stream) {
 // 	const chunks = []
 // 	stream.on('data', chunk => {
-// 		console.log("Pushing chunk: ", chunk)
+// 		console.log('Pushing chunk: ', chunk)
 // 		chunks.push(chunk)
 // 	})
-// 	stream.on('error', () => console.log("error"))
+// 	stream.on('error', () => console.log('error'))
 // 	stream.on('close', () => {
-// 		console.log("Chunks: ", chunks)
+// 		console.log('Chunks: ', chunks)
 // 		return Buffer.concat(chunks).toString('utf8')
 // 	})
 // }

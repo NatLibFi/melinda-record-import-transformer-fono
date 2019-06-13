@@ -26,17 +26,19 @@
 *
 */
 
+/* eslint-disable capitalized-comments, no-warning-comments */
+
 import transform from './transform';
-import createValidator from './validate';
-// Import {Transformer} from '@natlibfi/melinda-record-import-commons';
+// import createValidator from './validate';
+// import {Transformer} from '@natlibfi/melinda-record-import-commons';
 import fs from 'fs';
 
-// Const {startTransformer} = Transformer;
+// const {startTransformer} = Transformer;
 
 run();
 
 async function run() {
-	const validate = await createValidator();
+	// const validate = await createValidator();
 	// StartTransformer(transform, validate);
 
 	transform(fs.createReadStream('src/input.txt', 'utf8'));

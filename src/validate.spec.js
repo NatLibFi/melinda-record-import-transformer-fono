@@ -26,13 +26,13 @@
 *
 */
 
-import fs from 'fs';
-import path from 'path';
-import {expect} from 'chai';
-import {MarcRecord} from '@natlibfi/marc-record';
-import createValidator from './validate';
+// import fs from 'fs';
+// import path from 'path';
+// import {expect} from 'chai';
+// import {MarcRecord} from '@natlibfi/marc-record';
+// import createValidator from './validate';
 
-const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/validate');
+// const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/validate');
 
 // describe('validate', () => {
 // 	let validate;
