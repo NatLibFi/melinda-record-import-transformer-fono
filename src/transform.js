@@ -96,32 +96,31 @@ export default async function (stream) {
 		lines.map(generateMapLine);
 		appendMap(fonoMap);
 
-		handleLeader(fonoMap, marcRecord, Logger);
-		handle001(fonoMap, marcRecord, Logger); // Ok
-		handle002(fonoMap, Logger, leader000); // Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
-		handle102and104(fonoMap, marcRecord, Logger, control007, control008); // ToDo: Voyager clause not checked //This dictates how 102 is handled
-		handle103(fonoMap, marcRecord, Logger); // Ok
-		handle112(fonoMap, marcRecord, Logger); // Ok
-		handle120(fonoMap, marcRecord, Logger); // ToDo: How data is supposed to be parsed from input? Complex
-		handle130(fonoMap, marcRecord, Logger); // Ok
-		handle140(fonoMap, marcRecord, Logger); // Need rework as specs have been updated, do 190 simultaneously
-		handle141(fonoMap, marcRecord, Logger); // Ok
-		handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245
-		handle151(fonoMap, marcRecord, Logger);
-		handle162(fonoMap, marcRecord, Logger);
-		handle170(fonoMap, marcRecord, Logger, control008);
-		handle175(fonoMap, marcRecord, Logger); // Ok
-		handle180(fonoMap, marcRecord, Logger); // Ok
-		handle190(fonoMap, marcRecord, Logger); // Do this at the same time as 140
-		handle191(fonoMap, marcRecord, Logger); // Do this at the same time as 190
-		handle200(fonoMap, marcRecord, Logger); // Do this
-		handle222(fonoMap, marcRecord, Logger, control008); // Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
-		handle223and225(fonoMap, Logger, control008); // Ok
-		handle224(fonoMap, marcRecord, Logger, control008); // Ok
-		// handle228(); // NV: tätä ei enää käytetä
-		handle230(fonoMap, marcRecord, Logger);
-		handle243(fonoMap, marcRecord, Logger);
-		handle244(fonoMap, marcRecord, Logger, control008);
+		// handleLeader(fonoMap, marcRecord, Logger);
+		// handle001(fonoMap, marcRecord, Logger); // Ok
+		// handle002(fonoMap, Logger, leader000); // Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
+		// handle102and104(fonoMap, marcRecord, Logger, control007, control008); // ToDo: Voyager clause not checked //This dictates how 102 is handled
+		// handle103(fonoMap, marcRecord, Logger); // Ok
+		// handle112(fonoMap, marcRecord, Logger); // Ok
+		// handle120(fonoMap, marcRecord, Logger); // ToDo: How data is supposed to be parsed from input? Complex
+		// handle130(fonoMap, marcRecord, Logger); // 06 Weird ' -' in the end of subfields in expected
+		handle140(fonoMap, marcRecord, Logger); // 06 Need rework as specs have been updated, do 190 simultaneously, ToDo: Viola
+		// handle141(fonoMap, marcRecord, Logger); // Ok
+		// handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245
+		// handle151(fonoMap, marcRecord, Logger);
+		// handle162(fonoMap, marcRecord, Logger);
+		// handle170(fonoMap, marcRecord, Logger, control008);
+		// handle175(fonoMap, marcRecord, Logger); // Ok
+		// handle180(fonoMap, marcRecord, Logger); // Ok
+		handle190and191(fonoMap, marcRecord, Logger); // Do this at the same time as 140
+		// handle200(fonoMap, marcRecord, Logger); // Do this
+		// handle222(fonoMap, marcRecord, Logger, control008); // Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
+		// handle223and225(fonoMap, Logger, control008); // Ok
+		// handle224(fonoMap, marcRecord, Logger, control008); // Ok
+		// // handle228(); // NV: tätä ei enää käytetä
+		// handle230(fonoMap, marcRecord, Logger);
+		// handle243(fonoMap, marcRecord, Logger);
+		// handle244(fonoMap, marcRecord, Logger, control008);
 
 		return marcRecord;
 
@@ -149,6 +148,7 @@ export function appendMap(fonoMap) {
 		if (fonoMap.has(ind)) {
 			return true;
 		}
+
 		return false;
 	};
 
@@ -159,6 +159,7 @@ export function appendMap(fonoMap) {
 				return data[0];
 			}
 		}
+
 		return false;
 	};
 
@@ -166,6 +167,7 @@ export function appendMap(fonoMap) {
 		if (fonoMap.has(ind)) {
 			return fonoMap.get(ind);
 		}
+
 		return false;
 	};
 
@@ -182,6 +184,7 @@ export function appendMap(fonoMap) {
 			});
 			return data;
 		}
+
 		return dataAll;
 	};
 
@@ -290,6 +293,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 		Logger.log('error', '102 or 104 field: does not exist, or multiple fields');
 		return;
 	}
+
 	let tag = null;
 	let code = null;
 
@@ -381,6 +385,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 					}]
 				});
 			}
+
 			return;
 		}
 
@@ -427,6 +432,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 					}]
 				});
 			}
+
 			return;
 		}
 
@@ -590,6 +596,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 				// 338 ## $a äänilevy $b sd $2 rdacarrier
 				insert338('äänilevy', 'sd');
 			}
+
 			return;
 		}
 
@@ -645,6 +652,7 @@ export function handle103(fonoMap, marcRecord, Logger) {
 				if (e[0] !== curDisc) {
 					discs++;
 				}
+
 				curDisc = e[0];
 			});
 		}
@@ -826,6 +834,7 @@ export function handle120(fonoMap, marcRecord, Logger) {
 		if (places[i].match(/^Äänittäjä: *YLE/)) { // Duplicate check?
 			places.splice(i, 1);
 		}
+
 		// Place =~ s/\(live\) (\/\d:\d+-\d+)/(live 1)/;
 		places[i].match(/\(live\) (\/[0-9:,-]+)/, 'ToDo'); // (live 1)/
 		places[i].replace(/Suomi \(Ahvenanmaa\)/, 'Suomi: Ahvenanmaa');
@@ -1421,11 +1430,8 @@ export function handle130(fonoMap, marcRecord, Logger) {
 }
 
 // ToDO: Viola implementation
-// NVOLK: nykyään nuo aukikirjoitetaan: säv. → säveltäjä jne (loppupisteen olemassaolo riippuu kontekstista)
-// NVOLK: Huom. Fono ei kerro, onko kysessä ihminen vai yhteisötekijä (eli suomeksi tässä kontekstissa käytännössä aina yhtye). Jos nimi löytyy Violan tekijäauktoriteettitietueista, niin silloin käytetään sen mukaista tulkintaa. Muuten valistunut arvaus. (Esim. 'the' tai yksisananinen tekijä indikoi yleensä yhtyettä,)
+// NVOLK: Huom. Fono ei kerro, onko kysessä ihminen vai yhteisötekijä (eli suomeksi tässä kontekstissa käytännössä aina yhtye). Kenttien 190 ja 191 voidaan valistuneesti arvata osa tekijöistä yhteisötekijöiksi eli meneviksi kenttään X10. Lisäksi jos nimi löytyy Violan tekijäauktoriteettitietueista, niin silloin käytetään sen mukaista tulkintaa. Muuten valistunut arvaus. (Esim. "the" tai yksisananinen tekijä indikoi yleensä yhtyettä,)
 // NVOLK: Fonon nimiä (ja elinvuosia) verrataan Violan tekijäauktoriteettitietuiden nimiin ja salanimiin/taiteilijanimiin. Tarvittaessa Fonosta tuleva nimi vaihdetaan Violaan auktoriteettitietueen 1X0-kentän nimeen. (Esim. jos Fonon nimi löytyy vain auktoriteettitietueen 400-kentässä, niin saatetaankin käyttää auktoriteettitietueen 100-kentässä olevaa nimeä luotavassa tietueessa.)
-// NVOLK: Lisäksi noihin luotaviin tietueisiin on takautuvassa ajossa lisätty tekijöille elinvuodet. Tän varmaan voi toteuttaa Melindassa jotenkin fiksummin.
-// Kentästä voidaan saada myös Musiikin esityskokoonpano -tietoa kenttään 500, ja jotain Kansansävelmä-tietoa kenttään 381.
 export function handle140(fonoMap, marcRecord, Logger) {
 	const data001 = fonoMap.getSingle('001'); // Used to search L1
 	const data170 = fonoMap.getSingle('170'); // Used to search L1
@@ -1436,22 +1442,33 @@ export function handle140(fonoMap, marcRecord, Logger) {
 		return;
 	}
 
-	// * Henkilönnimistä pois syntymä- ja kuolinvuodet, esim. Mancini, Henry [1924-1994] (säv) -> 700 1# $a Mancini, Henry, $e säveltäjä.
-	let data = data140.replace(/(\[[\d-\s]*\])/g, '');
-	// * Nimen jälkeinen /pseud/ pois
-	data = data.replace(/(\/pseud\s\/)/g, '');
+	// // OLD: Henkilönnimistä pois syntymä- ja kuolinvuodet, esim. Mancini, Henry [1924-1994] (säv) -> 700 1# $a Mancini, Henry, $e säveltäjä.
+	// let data = data140.replace(/(\[[\d-\s]*\])/g, '');
+	// // OLD:  Nimen jälkeinen /pseud/ pois
+	// data = data.replace(/(\/pseud\s\/)/g, '');
 
-	let persons = data.split(/\./).filter(n => n); // Split each person to array
+	let persons = data140.split(/\./).filter(n => n); // Split each person to array
 	let sorted700Fields = [];
+	let compSet = false;
 
 	persons.forEach((person, ind) => {
-		// * Molemmissa Nimeämätön ja Anonyymi jätetään pois
-		if (person.match(/(nimeämätön)|(anonyymi)/i)) {
+		// Tekijät luokitellaan joko ihmisiksi tai yhteisötekijöiksi. Apuna arvauksissa voi käyttää Fonon 190- 
+		// ja 191-kenttiä ja Violan auktoriteettitietoja. Samalla saadaan kasaan tietoa pseudonyymeistä ja 
+		// elinvuosista. Nykyinenen implementaatio on liian pitkä kuvattavaksi tässä, eikä tietoa välttämättä
+		// muutenkaan käytetä tässä. Katsottava koodista.
+		person = person.trim();
+		console.log("Person: ", person)
+
+		// Osa tekijät-merkinnöistä ignoroidaan: /kokoelma/, /^julkaisija/i.
+		if( person.match(/kokoelma/) || person.match(/^julkaisija/i)){		
+			console.log("Match, ignore")
 			return;
 		}
 
 		// Split by parenthesis, but not with pseudonym explanation
 		let elements = person.split(/(\([^=].*\))/).filter(n => n);
+		console.log("Elements: ", elements);
+
 		if (elements.length > 2) {
 			Logger.log('error', `140 field: ppl has more than two components: ${elements}`);
 			return;
@@ -1462,161 +1479,136 @@ export function handle140(fonoMap, marcRecord, Logger) {
 			return;
 		}
 
-		let name = elements[0].replace(/(^\s+)|(\s+$)/g, ''); // Remove whitespaces from start and end of name
-		let comma = name.match(/^[^(]+,[^(]+/);
-		let functions = null;
-		if (elements.length === 2) {
-			functions = elements[1].match(/(säv)|(san)|(sov)|(esitt)/gi);
-		}
-
-		if (functions === null) {
-			marcRecord.insertField(getField());
-		} else {
-			functions.forEach(func => {
-				let field = getField(func);
-
-				// * 700-kentät järjestykseen -> säv, san, sov, esitt (low priority)
-				if (field.tag === '700') {
-					sortArr(field);
-				} else {
-					marcRecord.insertField(field);
-				}
-			});
-		}
-
-		function getField(func) {
-			let subfields = null;
-			// * Jos ei suluissa olevaa funktiomerkintöä, osakenttä $e jää pois ja osakentän $a pilkku (,) muutetaan pisteeksi (.)
-			if (typeof (func) === 'undefined') {
-				subfields = [{
-					code: 'a',
-					value: name + '.'
-				}];
-			} else {
-				subfields = [{
-					code: 'a',
-					value: name + ','
-				}, {
-					code: 'e',
-					value: func
-				}];
-			}
-
-			// Äänitteet (fonoMap.main())
-			if (fonoMap.main()) {
-				// Jos Fonon 001/170:ssa L1 (=taidemusiikki), ensimmäinen nimi ->
-				// 100 1# $a nnn, nnn, $e säv.
-				if (ind === 0 && ((data001 && data001.match(/L1/g)) || (data001 && data170.match(/L1/g)))) {
-					return {
-						tag: '100',
-						ind1: '1',
-						ind2: '',
-						subfields: [{
-							code: 'a',
-							value: name + ','
-						}, {
-							code: 'e',
-							value: 'säv.'
-						}]
-					};
-				}
-
-				// Muulloin kaikki nimet näin:
-				// 700 1# $a nnn, nnn, $e [funktio] (jos nimessä pilkku)
-				if (comma) {
-					return {
-						tag: '700',
-						ind1: '1',
-						ind2: '',
-						subfields: subfields
-					};
-
-				// 710 2# $a nnn, $e [funktio] (jos nimessä ei pilkkua)
-				}
-				return {
-					tag: '710',
-					ind1: '1',
-					ind2: '',
-					subfields: subfields
-				};
-
-			// Teokset / Osakohteet
-			}
-			if (ind === 0) {
-				if (comma) {
-					// 100 1# $a nnn, nnn, $e säv. (1. nimi, jos nimessä pilkku)
-					return {
-						tag: '100',
-						ind1: '1',
-						ind2: '',
-						subfields: [{
-							code: 'a',
-							value: name + ','
-						}, {
-							code: 'e',
-							value: 'säv.'
-						}]
-					};
-				}
-				// 110 2# $a nnn, $e säv. (1. nimi, jos nimessä ei pilkkua)
-				return {
-					tag: '110',
-					ind1: '2',
+		// Anonyymi-, Kansansävelmä-, Kansanperinne-, Kansanruno-, Kansanlaulu-, Kanteletar-, 
+		// Koraalitoisinto-, Negro spiritual-, Raamattu- ja Virsikirja-alkuiset "tekijät":
+		if( elements[0].match(/^anonyymi|^kansansävelmä|^kansanperinne|^kansanruno|^kansanlaulu|^kanteletar|^koraalitoisinto|^negro spiritual|^raamattu|^virsikirja/i)){
+			// - Jos tekijäfunktio on soitinnus:
+			// 500 ## $a Musiikin esityskokoonpano: nimi.
+			if(elements.length > 1 && elements[1].match(/soitinnus/i)){
+				marcRecord.insertField({
+					tag: '500',
+					ind1: '',
 					ind2: '',
 					subfields: [{
 						code: 'a',
-						value: name + ','
-					}, {
-						code: 'e',
-						value: 'säv.'
+						value: 'Musiikin esityskokoonpano: ' + elements[0] + '.'
 					}]
-				};
+				});
+			}
+			
+			// - Muuten, jos nimi alkaa Kansan:
+			// 381 ## $a nimi.
+			else if(elements[0].match(/^kansan/i)){
+				marcRecord.insertField({
+					tag: '381',
+					ind1: '',
+					ind2: '',
+					subfields: [{
+						code: 'a',
+						value: elements[0] + '.'
+					}]
+				});
+			}
+			
+			// -(Jos kenttä sisältää huomautuksen "/mahdollisesti", niin
+			// 381 ## $a mahdollisesti nimi.
+			else if(person.match(/^mahdollisesti/i)){
+				marcRecord.insertField({
+					tag: '381',
+					ind1: '',
+					ind2: '',
+					subfields: [{
+						code: 'a',
+						value: 'mahdollisesti ' + elements[0] + '.'
+					}]
+				});
+			}
+			
+			// -Muuten jos nimi pm Raamattu tai Kanteletar
+			// 500 ## $a Sanat: nimi.
+			else if(elements[0].match(/^raamattu|^kanteletar/i)){
+				marcRecord.insertField({
+					tag: '500',
+					ind1: '',
+					ind2: '',
+					subfields: [{
+						code: 'a',
+						value: 'Sanat: ' + elements[0] + '.'
+					}]
+				});
 			}
 
-			if (comma) {
-				// 700 1# $a nnn, nnn, $e [funktio] (1. nimen muut funktiot + muut nimet, jos pilkku)
-				return {
-					tag: '700',
-					ind1: '1',
+			// -Muuten
+			// 500 ## $a nimi.
+			else{
+				marcRecord.insertField({
+					tag: '500',
+					ind1: '',
 					ind2: '',
-					subfields: subfields
-				};
+					subfields: [{
+						code: 'a',
+						value: elements[0] + '.'
+					}]
+				});
 			}
-			// 710 2# $a nnn, $e [funktio] (1. nimen muut funktiot + muut nimet, jos ei pilkkua)
-			return {
-				tag: '710',
-				ind1: '2',
-				ind2: '',
-				subfields: subfields
-			};
 		}
 
-		function sortArr(field) {
-			var orderArr = [/säv/i, /san/i, /sov/i, /esitt/i];
-
-			if (sorted700Fields.length >= 1) {
-				var indexInserted = orderArr.findIndex(a => field.subfields[1].value.match(a));
-				var indexPos = 0;
-
-				sorted700Fields.forEach(element => {
-					if (orderArr.findIndex(a => element.subfields[1].value.match(a)) <= indexInserted) {
-						indexPos++;
-					}
+		// Osakohteet ja taidemusiikki
+		if(!fonoMap.main() || (data001 && data001.match(/L1/g)) || (data170 && data170.match(/L1/g))){
+			// Täältä yritetään löytää säveltäjä 1X0-kenttään. Eli muut jäljellä olevat tekijät: 
+			// otetaan eka tekijä, jonka tekijäfunktio on Fonossa "sän". Jos nimessä "ja/tai", niin
+			if(!compSet && elements.length > 1 && elements[1].match(/säv/)){
+				// 500 ## $a Tekijähuomautus: säveltäjä nimi.
+				marcRecord.insertField({
+					tag: '500',
+					ind1: '',
+					ind2: '',
+					subfields: [{
+						code: 'a',
+						value: 'Tekijähuomautus: ' + elements[0] + '.'
+					}]
 				});
 
-				sorted700Fields.splice(indexPos, 0, field);
-			} else {
-				sorted700Fields.push(field);
+				let tag = '100';
+				// Setvitään Violan auktoriteettitietokannan avulla kentän tyyppi (100 ihmiselle, 110 yhteisölle) indikaattori 1 (alla arvo Y) (sama kuin Violassa), mahdollinen salanimi ja mahdolliset elinvuodet.
+				// ToDO: Viola: above
+
+				// 1X0 Y# $a nimi, $c mahdollinen salanimi, $d YYYY-YYYY. tai YYYY- $e säveltäjä.
+				let subfields = [{
+					code: 'a',
+					value: elements[0]
+				}, {
+					code: 'e',
+					value: 'säveltäjä.'
+				}]
+
+				//ToDo: Viola: insert salanimi, vuodet
+				
+				marcRecord.insertField({
+					tag: tag,
+					ind1: '',
+					ind2: '',
+					subfields: subfields
+				});
 			}
-		}
+		}	
+
+		// Mahdollisesti poimittu tekijähuomautus
+
+		// 500 ## 1X0: Tekijähuomautus: huomautus.
+
+		// Poistetaan eka tekijä listasta. Loppujen 700-kenttään menevien tekijöiden käsittely 
+		// kuvattu kenttien 190- ja 191-yhteydessä.
+		
+		
 	});
 
 	// Finally insert sorted fields
-	if (sorted700Fields.length > 0) {
-		sorted700Fields.forEach(field => {
-			marcRecord.insertField(field);
-		});
-	}
+	// if (sorted700Fields.length > 0) {
+	// 	sorted700Fields.forEach(field => {
+	// 		marcRecord.insertField(field);
+	// 	});
+	// }
 }
 
 export function handle141(fonoMap, marcRecord, Logger) {
@@ -1952,14 +1944,6 @@ export function handle180(fonoMap, marcRecord, Logger) {
 // 190kosketinsoittimet).
 // 190(Saxman Syrjänen ja Jukka Gustavson Mojomen /yhteinen yhtye).
 
-export function handle190(fonoMap, marcRecord, Logger) {
-	const data190 = fonoMap.getAllCombined('190');
-
-	if (data190 === false) {
-		Logger.log('info', '190 field: does not exist');
-	}
-}
-
 // Input: 'syntetisaattori).'
 // Äänitteet
 // 191Ym.
@@ -1982,20 +1966,39 @@ export function handle190(fonoMap, marcRecord, Logger) {
 // 191Orkesterin jäsenet lueteltu tekstilehtisessä.
 // 191Yhtyeen jäsenet ja avustajat lueteltu oheistiedoissa.
 // 191Yhtyeen jäsenet lueteltu yleistietodokumentissa ja oheistiedoissa.
-
-export function handle191(fonoMap, marcRecord, Logger) {
+export function handle190and191(fonoMap, marcRecord, Logger) {
+	const data190 = fonoMap.getAllCombined('190');
 	const data191 = fonoMap.getAllCombined('191');
 
-	if (data191 === false) {
-		Logger.log('info', '191 field: does not exist');
-		// return;
+	console.log('---------- 190&191 ---------');
+	console.log(data190);
+	console.log(data191);
+	console.log('----------------------------');
+
+	if (data190 === false) {
+		Logger.log('info', '190 field: does not exist');
 	}
 
-	// POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
-	// if (data191.match(/\byleistietodoku/i)) {
-	// }
+	// 191: samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
+	// 191: POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
 
-	// Samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
+	if (fonoMap.main()) {
+		// 190 - Emot
+		// 511 0_ $a sellaisenaan
+		// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
+		// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
+		// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
+
+	}else{
+		// 190 - Osakohteet
+		// 511 0_ $a sellaisenaan
+		// lisäksi jokainen nimi 700 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
+		// 710 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
+		// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 700/710-kentistä
+		// Nimeämätön -> ei 700/710
+
+		// ks. Artikkelien ohitus
+	}
 }
 
 export function handle200(fonoMap, marcRecord, Logger) {
@@ -2114,6 +2117,7 @@ export function handle223and225(fonoMap, Logger, control008) {
 			if (fonoMap.exists(225)) {
 				field = '225';
 			}
+
 			Logger.log('error', `223 field: failed to insert to control from '${field}', transformed to:' ${countryCode}'`);
 		}
 	}
@@ -2461,6 +2465,7 @@ function isOnlineMaterial(input) {
 	if (onlineCodes.contains(input)) {
 		return true;
 	}
+
 	return false;
 }
 
@@ -2468,6 +2473,7 @@ function insertToControl(control, start, length, data) {
 	if (typeof (data) !== 'string' || data.length > length) {
 		return false;
 	}
+
 	data.split('').forEach((char, ind) => {
 		control.push({ind: start + ind, val: char});
 	});

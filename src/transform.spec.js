@@ -62,6 +62,7 @@ describe('transform - from files', () => {
 						console.log('Breaking');
 						return;
 					}
+
 					let lines = record.split(/[\r\n]+/).filter(n => n); // Split each line to array. Remove first, seems to be index not used in transformation
 
 					describe('transform - for record: ' + lines[0], () => {
@@ -201,14 +202,8 @@ describe('transform - from files', () => {
 								done();
 							});
 
-							it('190', done => {
-								testContext.handle190(fonoMap, marcRecord, Logger);
-								expect(matchSubfields(marcRecord)).to.eql(true);
-								done();
-							});
-
-							it('191', done => {
-								testContext.handle191(fonoMap, marcRecord, Logger);
+							it('19&191', done => {
+								testContext.handle190and191(fonoMap, marcRecord, Logger);
 								expect(matchSubfields(marcRecord)).to.eql(true);
 								done();
 							});
