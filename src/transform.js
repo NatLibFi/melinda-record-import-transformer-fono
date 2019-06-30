@@ -96,31 +96,31 @@ export default async function (stream) {
 		lines.map(generateMapLine);
 		appendMap(fonoMap);
 
-		// handleLeader(fonoMap, marcRecord, Logger);
-		// handle001(fonoMap, marcRecord, Logger); // Ok
-		// handle002(fonoMap, Logger, leader000); // Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
-		// handle102and104(fonoMap, marcRecord, Logger, control007, control008); // ToDo: Voyager clause not checked //This dictates how 102 is handled
-		// handle103(fonoMap, marcRecord, Logger); // Ok
-		// handle112(fonoMap, marcRecord, Logger); // Ok
-		// handle120(fonoMap, marcRecord, Logger); // ToDo: How data is supposed to be parsed from input? Complex
-		// handle130(fonoMap, marcRecord, Logger); // 06 Weird ' -' in the end of subfields in expected
+		handleLeader(fonoMap, marcRecord, Logger);
+		handle001(fonoMap, marcRecord, Logger); // Ok
+		handle002(fonoMap, Logger, leader000); // Seems to originate from index 8 of input (9th char) //This checks records type (main/sub) and sets boolean main
+		handle102and104(fonoMap, marcRecord, Logger, control007, control008); // ToDo: Voyager clause not checked //This dictates how 102 is handled
+		handle103(fonoMap, marcRecord, Logger); // Ok
+		handle112(fonoMap, marcRecord, Logger); // Ok
+		handle120(fonoMap, marcRecord, Logger); // ToDo: How data is supposed to be parsed from input? Complex
+		handle130(fonoMap, marcRecord, Logger); // 06 Weird ' -' in the end of subfields in expected
 		handle140(fonoMap, marcRecord, Logger); // 06 Need rework as specs have been updated, do 190 simultaneously, ToDo: Viola
-		// handle141(fonoMap, marcRecord, Logger); // Ok
-		// handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245
-		// handle151(fonoMap, marcRecord, Logger);
-		// handle162(fonoMap, marcRecord, Logger);
-		// handle170(fonoMap, marcRecord, Logger, control008);
-		// handle175(fonoMap, marcRecord, Logger); // Ok
-		// handle180(fonoMap, marcRecord, Logger); // Ok
+		handle141(fonoMap, marcRecord, Logger); // Ok
+		handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245
+		handle151(fonoMap, marcRecord, Logger);
+		handle162(fonoMap, marcRecord, Logger);
+		handle170(fonoMap, marcRecord, Logger, control008);
+		handle175(fonoMap, marcRecord, Logger); // Ok
+		handle180(fonoMap, marcRecord, Logger); // Ok
 		handle190and191(fonoMap, marcRecord, Logger); // Do this at the same time as 140
-		// handle200(fonoMap, marcRecord, Logger); // Do this
-		// handle222(fonoMap, marcRecord, Logger, control008); // Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
-		// handle223and225(fonoMap, Logger, control008); // Ok
-		// handle224(fonoMap, marcRecord, Logger, control008); // Ok
-		// // handle228(); // NV: tätä ei enää käytetä
-		// handle230(fonoMap, marcRecord, Logger);
-		// handle243(fonoMap, marcRecord, Logger);
-		// handle244(fonoMap, marcRecord, Logger, control008);
+		handle200(fonoMap, marcRecord, Logger); // Do this
+		handle222(fonoMap, marcRecord, Logger, control008); // Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
+		handle223and225(fonoMap, Logger, control008); // Ok
+		handle224(fonoMap, marcRecord, Logger, control008); // Ok
+		// handle228(); // NV: tätä ei enää käytetä
+		handle230(fonoMap, marcRecord, Logger);
+		handle243(fonoMap, marcRecord, Logger);
+		handle244(fonoMap, marcRecord, Logger, control008);
 
 		return marcRecord;
 
@@ -1590,17 +1590,17 @@ export function handle140(fonoMap, marcRecord, Logger) {
 					ind2: '',
 					subfields: subfields
 				});
+			
+			// Mahdollisesti poimittu tekijähuomautus
+			// 500 ## 1X0: Tekijähuomautus: huomautus.
+			// This is handled in handle141()
+
+			// Poistetaan eka tekijä listasta. Loppujen 700-kenttään menevien tekijöiden käsittely 
+			// kuvattu kenttien 190- ja 191-yhteydessä.
+			}else{
+
 			}
 		}	
-
-		// Mahdollisesti poimittu tekijähuomautus
-
-		// 500 ## 1X0: Tekijähuomautus: huomautus.
-
-		// Poistetaan eka tekijä listasta. Loppujen 700-kenttään menevien tekijöiden käsittely 
-		// kuvattu kenttien 190- ja 191-yhteydessä.
-		
-		
 	});
 
 	// Finally insert sorted fields
@@ -1629,6 +1629,97 @@ export function handle141(fonoMap, marcRecord, Logger) {
 		}]
 	});
 }
+
+export function handle190and191(fonoMap, marcRecord, Logger) {
+	const data190 = fonoMap.getAllCombined('190');
+	const data191 = fonoMap.getAllCombined('191');
+
+	console.log('---------- 190&191 ---------');
+	console.log(data190);
+	console.log(data191);
+	console.log('----------------------------');
+
+	if (data190 === false) {
+		Logger.log('info', '190 field: does not exist');
+	}
+
+	// 191: samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
+	// 191: POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
+
+	if (fonoMap.main()) {
+		// 190 - Emot
+		// 511 0_ $a sellaisenaan
+		// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
+		// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
+		// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
+
+	}else{
+		// 190 - Osakohteet
+		// 511 0_ $a sellaisenaan
+		// lisäksi jokainen nimi 700 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
+		// 710 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
+		// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 700/710-kentistä
+		// Nimeämätön -> ei 700/710
+
+		// ks. Artikkelien ohitus
+	}
+}
+
+// Input: 'Iron Magazine (yhtye).'
+
+// Äänitteet
+// 190Maksetut viulut (yhtye).
+// 190Kalatie, Heli (piano).  Lampi, Venla (piano).  Ym.
+// 190Black Magic Six (yhtye).
+// 190Saartamo, Venla (laulu, yhtye).
+
+// 190Suomen Rauhanyhdistysten Keskusyhdistyksen (SRK:n) kuoro (kuoro).
+// 190Heikkilä, Olli (kuoronjohtaja).  Kallunki, Lauri-Kalle (urut).
+// 190Soranta, Juha (cembalo).
+
+// 190Tuomari Nurmio (laulu, kitara, yhtye).
+// 190(Dumari ja Spuget).
+
+// 190Sydänmäki, Jussi (laulu).  Louhivuori, Janne (kitara, ym).
+// 190(Jussi Sydänmäki ja Janne Louhivuori /yhteinen yhtye).
+
+// 190Pennanen, Keijo (kitara).  Korpela, Jukka (bassokitara).  Dominis,
+// 190Rob (piano ja/tai: kosketinsoittimet).  Karvonen, Jari-Pekka 'Jartsa'
+// 190(rummut ja/tai: lyömäsoittimet).
+
+// Teos
+// 190Jarnos, The (yhtye).
+// 190Roponen, Jussi (laulu, yhtye).
+// 190Syrjänen, Saxman (saksofoni).  Gustavson, Jukka (sähköurut,
+// 190HeviSaurus (yhtye).
+// 190Alanko, Ismo (laulu, piano).
+
+// 190Syrjänen, Saxman (saksofoni).  Gustavson, Jukka (sähköurut,
+// 190kosketinsoittimet).
+// 190(Saxman Syrjänen ja Jukka Gustavson Mojomen /yhteinen yhtye).
+
+// Input: 'syntetisaattori).'
+// Äänitteet
+// 191Ym.
+// 191Yhtyeen muut jäsenet lueteltu oheislehtisessä.
+// 191Sekä: Puljula, Sara (kontrabasso).  Kettunen, Jari 'Kepa' (rummut).
+
+// 191Muut jäsenet: Rauhala, Ville (kontrabasso).  Heikinheimo, Ilmari
+// 191(rummut ja/tai: lyömäsoittimet).
+
+// 191Godzinsky, George de (johtaja /01-11,15-18).  Radion viihdeorkesteri
+// 191(Helsinki) (orkesteri /01-11,15-18).  Salo, Jaakko (johtaja /12-14).
+// 191Studio-orkesteri (orkesteri /12-14).  Radiokuoro (kuoro /06).
+// 191Kinnunen, Laila (laulu /07).  Mustonen, Ritva (laulu /07).
+// 191Koskimies, Pentti (piano /19-21).  Englund, Ingmar (kitara /19-21).
+// 191Helistö, Paavo (klarinetti /19-21).  Helenius, Mikko (piano,
+// 191harmonikka: bandoneon, vihellys /22).
+
+// Teos
+// 191Yhtyeen jäsenet lueteltu esittelylehtisessä.
+// 191Orkesterin jäsenet lueteltu tekstilehtisessä.
+// 191Yhtyeen jäsenet ja avustajat lueteltu oheistiedoissa.
+// 191Yhtyeen jäsenet lueteltu yleistietodokumentissa ja oheistiedoissa.
 
 // *********************
 // tark. taidemusiikin moniriviset nimekkeet! esim.:
@@ -1700,6 +1791,7 @@ export function handle150(fonoMap, marcRecord, Logger) {
 
 	// 1508 foot Joe
 	// 150(hakuapu: Eight foot Joe).
+
 
 	// 150Jenkki purukumi
 	// 150(Hi there Jenkki lovers -).
@@ -1895,110 +1987,6 @@ export function handle180(fonoMap, marcRecord, Logger) {
 			value: 'Aihepiiri:' + data
 		}]
 	});
-}
-
-// Emot
-// 511 0_ $a sellaisenaan
-// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
-// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
-// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
-
-// Osakohteet
-// 511 0_ $a sellaisenaan
-// lisäksi jokainen nimi 700 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
-// 710 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
-// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 700/710-kentistä
-// Nimeämätön -> ei 700/710
-// ks. Artikkelien ohitus
-
-// Input: 'Iron Magazine (yhtye).'
-
-// Äänitteet
-// 190Maksetut viulut (yhtye).
-// 190Kalatie, Heli (piano).  Lampi, Venla (piano).  Ym.
-// 190Black Magic Six (yhtye).
-// 190Saartamo, Venla (laulu, yhtye).
-
-// 190Suomen Rauhanyhdistysten Keskusyhdistyksen (SRK:n) kuoro (kuoro).
-// 190Heikkilä, Olli (kuoronjohtaja).  Kallunki, Lauri-Kalle (urut).
-// 190Soranta, Juha (cembalo).
-
-// 190Tuomari Nurmio (laulu, kitara, yhtye).
-// 190(Dumari ja Spuget).
-
-// 190Sydänmäki, Jussi (laulu).  Louhivuori, Janne (kitara, ym).
-// 190(Jussi Sydänmäki ja Janne Louhivuori /yhteinen yhtye).
-
-// 190Pennanen, Keijo (kitara).  Korpela, Jukka (bassokitara).  Dominis,
-// 190Rob (piano ja/tai: kosketinsoittimet).  Karvonen, Jari-Pekka 'Jartsa'
-// 190(rummut ja/tai: lyömäsoittimet).
-
-// Teos
-// 190Jarnos, The (yhtye).
-// 190Roponen, Jussi (laulu, yhtye).
-// 190Syrjänen, Saxman (saksofoni).  Gustavson, Jukka (sähköurut,
-// 190HeviSaurus (yhtye).
-// 190Alanko, Ismo (laulu, piano).
-
-// 190Syrjänen, Saxman (saksofoni).  Gustavson, Jukka (sähköurut,
-// 190kosketinsoittimet).
-// 190(Saxman Syrjänen ja Jukka Gustavson Mojomen /yhteinen yhtye).
-
-// Input: 'syntetisaattori).'
-// Äänitteet
-// 191Ym.
-// 191Yhtyeen muut jäsenet lueteltu oheislehtisessä.
-// 191Sekä: Puljula, Sara (kontrabasso).  Kettunen, Jari 'Kepa' (rummut).
-
-// 191Muut jäsenet: Rauhala, Ville (kontrabasso).  Heikinheimo, Ilmari
-// 191(rummut ja/tai: lyömäsoittimet).
-
-// 191Godzinsky, George de (johtaja /01-11,15-18).  Radion viihdeorkesteri
-// 191(Helsinki) (orkesteri /01-11,15-18).  Salo, Jaakko (johtaja /12-14).
-// 191Studio-orkesteri (orkesteri /12-14).  Radiokuoro (kuoro /06).
-// 191Kinnunen, Laila (laulu /07).  Mustonen, Ritva (laulu /07).
-// 191Koskimies, Pentti (piano /19-21).  Englund, Ingmar (kitara /19-21).
-// 191Helistö, Paavo (klarinetti /19-21).  Helenius, Mikko (piano,
-// 191harmonikka: bandoneon, vihellys /22).
-
-// Teos
-// 191Yhtyeen jäsenet lueteltu esittelylehtisessä.
-// 191Orkesterin jäsenet lueteltu tekstilehtisessä.
-// 191Yhtyeen jäsenet ja avustajat lueteltu oheistiedoissa.
-// 191Yhtyeen jäsenet lueteltu yleistietodokumentissa ja oheistiedoissa.
-export function handle190and191(fonoMap, marcRecord, Logger) {
-	const data190 = fonoMap.getAllCombined('190');
-	const data191 = fonoMap.getAllCombined('191');
-
-	console.log('---------- 190&191 ---------');
-	console.log(data190);
-	console.log(data191);
-	console.log('----------------------------');
-
-	if (data190 === false) {
-		Logger.log('info', '190 field: does not exist');
-	}
-
-	// 191: samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
-	// 191: POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
-
-	if (fonoMap.main()) {
-		// 190 - Emot
-		// 511 0_ $a sellaisenaan
-		// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
-		// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
-		// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
-
-	}else{
-		// 190 - Osakohteet
-		// 511 0_ $a sellaisenaan
-		// lisäksi jokainen nimi 700 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
-		// 710 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
-		// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 700/710-kentistä
-		// Nimeämätön -> ei 700/710
-
-		// ks. Artikkelien ohitus
-	}
 }
 
 export function handle200(fonoMap, marcRecord, Logger) {

@@ -202,7 +202,7 @@ describe('transform - from files', () => {
 								done();
 							});
 
-							it('19&191', done => {
+							it('190&191', done => {
 								testContext.handle190and191(fonoMap, marcRecord, Logger);
 								expect(matchSubfields(marcRecord)).to.eql(true);
 								done();
