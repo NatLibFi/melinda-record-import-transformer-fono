@@ -299,7 +299,7 @@ describe('transform - from files', () => {
 							let ok = true;
 							input.forEach(e => {
 								if (expected[e.ind] !== e.val) {
-									console.log(`Failed match check: ${e.val} not expected ${expected[e.ind]} in ${context} index ${e.ind}`);
+									printFail(e.val, expected[e.ind], context, e.ind);
 									ok = false;
 								}
 							});
@@ -323,7 +323,7 @@ describe('transform - from files', () => {
 								// console.log('to: ', comp)
 
 								if (typeof (comp) === 'undefined') {
-									console.log(`Failed match check: ${JSON.stringify(field, null, 2)} comparison not found from expected`);
+									printNotFound(field)
 									ok = false;
 								} else {
 									// Go trough each subfield of input
@@ -337,7 +337,7 @@ describe('transform - from files', () => {
 											// console.log('Some: ', field)
 											return compSub.code === sub.code && compSub.value === sub.value;
 										})) {
-											console.log(`Failed match check: ${JSON.stringify(sub, null, 2)} not found from expected ${JSON.stringify(comp.subfields, null, 2)} in ${field.tag}`);
+											printNotFoundExpected(sub, comp.subfields, field)
 											ok = false;
 										}
 										// else{
@@ -354,6 +354,37 @@ describe('transform - from files', () => {
 		});
 	});
 });
+
+function printFail(val, expected, context, ind){
+	console.log("---------------------------")
+	console.log(`Failed match check: ${val} not expected ${expected} in ${context} index ${ind}`);
+	console.log("---------------------------")
+}
+
+function printNotFoundExpected(sub, subfields, field){
+	console.log("---------------------------")
+	console.log(`Failed match check in tag ${field.tag} - subfield not found:`);
+	formatMarcPrint(sub);
+	console.log(`Expected:`);
+	subfields.forEach(s =>{
+		formatMarcPrint(s)
+	})
+	console.log("---------------------------")
+}
+
+function printNotFound(field){
+	console.log("---------------------------")
+	console.log(`Failed match check with tag ${field.tag} - tag not found:`);
+	field.subfields.forEach(s =>{
+		formatMarcPrint(s)
+	})
+	console.log("---------------------------")
+}
+
+function formatMarcPrint(subfield){
+	console.log(subfield.code + ": " + subfield.value)
+
+}
 
 // //Check subfield against expected fields subfields
 // if(!comp.some(rec => {
