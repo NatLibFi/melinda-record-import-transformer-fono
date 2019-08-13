@@ -35,6 +35,7 @@ import sinonChai from 'sinon-chai';
 import * as testContext from './transform';
 import {Utils} from '@natlibfi/melinda-commons';
 import {MarcRecord} from '@natlibfi/marc-record';
+import {Readable} from 'stream';
 
 const {createLogger} = Utils;
 chai.use(sinonChai);
@@ -81,22 +82,23 @@ describe('transform - from files', () => {
 						// console.log('Record: ', record)
 						// console.log('******************************')
 
-						// it('General Test', async function(){
-						// 	record = '***'+record;
-						// 	const s = new Readable();
-						// 	s.push(Buffer.from(record, 'utf8'));
-						// 	s.push(null);
-						// 	let transformed = await testContext.default(s);
+						// eslint-disable-next-line complexity
+						it('General Test', async function () {
+							record = '***' + record;
+							const s = new Readable();
+							s.push(Buffer.from(record, 'utf8'));
+							s.push(null);
+							let transformed = await testContext.default(s);
 
-						// 	// console.log('-------- transformed ----------')
-						// 	// console.log('leader: ', transformed[0].leader)
-						// 	// console.log(transformed[0].fields)
-						// 	// console.log('-------- expectedOutput ----------')
-						// 	// console.log(expectedOutput[ind])
+							console.log('-------- transformed ----------');
+							console.log('leader: ', transformed[0].leader);
+							console.log(transformed[0].fields);
+							console.log('-------- expectedOutput ----------');
+							console.log(expectedOutput[ind]);
 
-						// 	expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
-						// 	expect(transformed[0].fields).to.eql(expectedOutput[ind].fields);
-						// });
+							expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
+							expect(transformed[0].fields).to.eql(expectedOutput[ind].fields);
+						});
 
 						describe('Specific tests:', () => {
 							beforeEach(() => {
@@ -165,6 +167,7 @@ describe('transform - from files', () => {
 							});
 
 							it('150', done => {
+								testContext.handle130(fonoMap, marcRecord, Logger); //F130 generates M245 used in F150
 								testContext.handle150(fonoMap, marcRecord, Logger);
 								expect(matchSubfields(marcRecord)).to.eql(true);
 								done();
@@ -323,7 +326,7 @@ describe('transform - from files', () => {
 								// console.log('to: ', comp)
 
 								if (typeof (comp) === 'undefined') {
-									printNotFound(field)
+									printNotFound(field);
 									ok = false;
 								} else {
 									// Go trough each subfield of input
@@ -337,7 +340,7 @@ describe('transform - from files', () => {
 											// console.log('Some: ', field)
 											return compSub.code === sub.code && compSub.value === sub.value;
 										})) {
-											printNotFoundExpected(sub, comp.subfields, field)
+											printNotFoundExpected(sub, comp.subfields, field);
 											ok = false;
 										}
 										// else{
@@ -355,35 +358,34 @@ describe('transform - from files', () => {
 	});
 });
 
-function printFail(val, expected, context, ind){
-	console.log("---------------------------")
+function printFail(val, expected, context, ind) {
+	console.log('---------------------------');
 	console.log(`Failed match check: ${val} not expected ${expected} in ${context} index ${ind}`);
-	console.log("---------------------------")
+	console.log('---------------------------');
 }
 
-function printNotFoundExpected(sub, subfields, field){
-	console.log("---------------------------")
+function printNotFoundExpected(sub, subfields, field) {
+	console.log('---------------------------');
 	console.log(`Failed match check in tag ${field.tag} - subfield not found:`);
 	formatMarcPrint(sub);
-	console.log(`Expected:`);
-	subfields.forEach(s =>{
-		formatMarcPrint(s)
-	})
-	console.log("---------------------------")
+	console.log('Expected:');
+	subfields.forEach(s => {
+		formatMarcPrint(s);
+	});
+	console.log('---------------------------');
 }
 
-function printNotFound(field){
-	console.log("---------------------------")
+function printNotFound(field) {
+	console.log('---------------------------');
 	console.log(`Failed match check with tag ${field.tag} - tag not found:`);
-	field.subfields.forEach(s =>{
-		formatMarcPrint(s)
-	})
-	console.log("---------------------------")
+	field.subfields.forEach(s => {
+		formatMarcPrint(s);
+	});
+	console.log('---------------------------');
 }
 
-function formatMarcPrint(subfield){
-	console.log(subfield.code + ": " + subfield.value)
-
+function formatMarcPrint(subfield) {
+	console.log(subfield.code + ': ' + subfield.value);
 }
 
 // //Check subfield against expected fields subfields

@@ -104,15 +104,15 @@ export default async function (stream) {
 		handle112(fonoMap, marcRecord, Logger); // Ok
 		handle120(fonoMap, marcRecord, Logger); // ToDo: How data is supposed to be parsed from input? Complex
 		handle130(fonoMap, marcRecord, Logger); // 06 Weird ' -' in the end of subfields in expected
-		handle140(fonoMap, marcRecord, Logger); // 06 Need rework as specs have been updated, do 190 simultaneously, ToDo: Viola
+		handle140(fonoMap, marcRecord, Logger); // 08 Reworked solution, needs testing, connected to 140, ToDo: Viola
 		handle141(fonoMap, marcRecord, Logger); // Ok
-		handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245
-		handle151(fonoMap, marcRecord, Logger);
+		handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245 // _Tämä on oikeastaan niin monimutkainen, ettei sitä voi kunnolla speksata, vaan pitää reverse engineerata..._
+		handle151(fonoMap, marcRecord, Logger); // Ok
 		handle162(fonoMap, marcRecord, Logger);
 		handle170(fonoMap, marcRecord, Logger, control008);
 		handle175(fonoMap, marcRecord, Logger); // Ok
 		handle180(fonoMap, marcRecord, Logger); // Ok
-		handle190and191(fonoMap, marcRecord, Logger); // Do this at the same time as 140
+		handle190and191(fonoMap, marcRecord, Logger); // 08 Reworked solution, needs testing, connected to 140
 		handle200(fonoMap, marcRecord, Logger); // Do this
 		handle222(fonoMap, marcRecord, Logger, control008); // Check xxxx-xxxx & xxxx&xxxx & xxxx& cases, only detects first
 		handle223and225(fonoMap, Logger, control008); // Ok
@@ -1448,10 +1448,11 @@ export function handle140(fonoMap, marcRecord, Logger) {
 	// data = data.replace(/(\/pseud\s\/)/g, '');
 
 	let persons = data140.split(/\./).filter(n => n); // Split each person to array
-	//let sorted700Fields = [];
+	// let sorted700Fields = [];
 	let compSet = false;
 
-	persons.forEach((person) => {
+	// eslint-disable-next-line complexity
+	persons.forEach(person => {
 		// Tekijät luokitellaan joko ihmisiksi tai yhteisötekijöiksi. Apuna arvauksissa voi käyttää Fonon 190-
 		// ja 191-kenttiä ja Violan auktoriteettitietoja. Samalla saadaan kasaan tietoa pseudonyymeistä ja
 		// elinvuosista. Nykyinenen implementaatio on liian pitkä kuvattavaksi tässä, eikä tietoa välttämättä
@@ -1460,8 +1461,8 @@ export function handle140(fonoMap, marcRecord, Logger) {
 		// console.log('Person: ', person)
 
 		// Osa tekijät-merkinnöistä ignoroidaan: /kokoelma/, /^julkaisija/i.
-		if( person.match(/kokoelma/) || person.match(/^julkaisija/i)){
-			console.log('Match, ignore')
+		if (person.match(/kokoelma/) || person.match(/^julkaisija/i)) {
+			console.log('Match, ignore');
 			return;
 		}
 
@@ -1479,12 +1480,12 @@ export function handle140(fonoMap, marcRecord, Logger) {
 			return;
 		}
 
-		// Anonyymi-, Kansansävelmä-, Kansanperinne-, Kansanruno-, Kansanlaulu-, Kanteletar-, 
+		// Anonyymi-, Kansansävelmä-, Kansanperinne-, Kansanruno-, Kansanlaulu-, Kanteletar-,
 		// Koraalitoisinto-, Negro spiritual-, Raamattu- ja Virsikirja-alkuiset 'tekijät':
-		if( elements[0].match(/^anonyymi|^kansansävelmä|^kansanperinne|^kansanruno|^kansanlaulu|^kanteletar|^koraalitoisinto|^negro spiritual|^raamattu|^virsikirja/i)){
+		if (elements[0].match(/^anonyymi|^kansansävelmä|^kansanperinne|^kansanruno|^kansanlaulu|^kanteletar|^koraalitoisinto|^negro spiritual|^raamattu|^virsikirja/i)) {
 			// - Jos tekijäfunktio on soitinnus:
 			// 500 ## $a Musiikin esityskokoonpano: nimi.
-			if(elements.length > 1 && elements[1].match(/soitinnus/i)){
+			if (elements.length > 1 && elements[1].match(/soitinnus/i)) {
 				marcRecord.insertField({
 					tag: '500',
 					ind1: '',
@@ -1494,11 +1495,10 @@ export function handle140(fonoMap, marcRecord, Logger) {
 						value: 'Musiikin esityskokoonpano: ' + elements[0] + '.'
 					}]
 				});
-			}
-			
+
 			// - Muuten, jos nimi alkaa Kansan:
 			// 381 ## $a nimi.
-			else if(elements[0].match(/^kansan/i)){
+			} else if (elements[0].match(/^kansan/i)) {
 				marcRecord.insertField({
 					tag: '381',
 					ind1: '',
@@ -1508,11 +1508,9 @@ export function handle140(fonoMap, marcRecord, Logger) {
 						value: elements[0] + '.'
 					}]
 				});
-			}
-			
 			// -(Jos kenttä sisältää huomautuksen '/mahdollisesti', niin
 			// 381 ## $a mahdollisesti nimi.
-			else if(person.match(/^mahdollisesti/i)){
+			} else if (person.match(/^mahdollisesti/i)) {
 				marcRecord.insertField({
 					tag: '381',
 					ind1: '',
@@ -1522,11 +1520,10 @@ export function handle140(fonoMap, marcRecord, Logger) {
 						value: 'mahdollisesti ' + elements[0] + '.'
 					}]
 				});
-			}
-			
+
 			// -Muuten jos nimi pm Raamattu tai Kanteletar
 			// 500 ## $a Sanat: nimi.
-			else if(elements[0].match(/^raamattu|^kanteletar/i)){
+			} else if (elements[0].match(/^raamattu|^kanteletar/i)) {
 				marcRecord.insertField({
 					tag: '500',
 					ind1: '',
@@ -1536,11 +1533,10 @@ export function handle140(fonoMap, marcRecord, Logger) {
 						value: 'Sanat: ' + elements[0] + '.'
 					}]
 				});
-			}
 
 			// -Muuten
 			// 500 ## $a nimi.
-			else{
+			} else {
 				marcRecord.insertField({
 					tag: '500',
 					ind1: '',
@@ -1554,14 +1550,14 @@ export function handle140(fonoMap, marcRecord, Logger) {
 		}
 
 		// Osakohteet ja taidemusiikki
-		if(!fonoMap.main() || (data001 && data001.match(/L1/g)) || (data170 && data170.match(/L1/g))){
-			// Täältä yritetään löytää säveltäjä 1X0-kenttään. Eli muut jäljellä olevat tekijät: 
-			// otetaan eka tekijä, jonka tekijäfunktio on Fonossa "säv". 
-			if(!compSet && elements.length > 1 && elements[1].match(/säv/)){
+		if (!fonoMap.main() || (data001 && data001.match(/L1/g)) || (data170 && data170.match(/L1/g))) {
+			// Täältä yritetään löytää säveltäjä 1X0-kenttään. Eli muut jäljellä olevat tekijät:
+			// otetaan eka tekijä, jonka tekijäfunktio on Fonossa "säv".
+			if (!compSet && elements.length > 1 && elements[1].match(/säv/)) {
 				// Eli tässä ekassa tapauksessa tekijähuomautukseen tulee poikkeuksellisesti mukaan tuo säveltäjä-tieto. (Muualla pelkät nimet riittävät.)
 
 				// Setvitään Violan auktoriteettitietokannan avulla kentän tyyppi (100 ihmiselle, 110 yhteisölle) indikaattori 1 (alla arvo Y) (sama kuin Violassa), mahdollinen salanimi ja mahdolliset elinvuodet.
-				let tag = '100';				
+				let tag = '100';
 				// ToDO: Viola: above
 
 				// 1X0 Y# $a nimi, $c mahdollinen salanimi, $d YYYY-YYYY. tai YYYY- $e säveltäjä.
@@ -1571,10 +1567,10 @@ export function handle140(fonoMap, marcRecord, Logger) {
 				}, {
 					code: 'e',
 					value: 'säveltäjä.'
-				}]
+				}];
 
-				//ToDo: Viola: insert salanimi, vuodet
-				
+				// ToDo: Viola: insert salanimi, vuodet
+
 				marcRecord.insertField({
 					tag: tag,
 					ind1: '',
@@ -1586,34 +1582,33 @@ export function handle140(fonoMap, marcRecord, Logger) {
 				// 500-kenttään tehdään merkintä, jossa myös vaihtoehtoinen/rinnakkainen tekijä on mukana tyyliin:
 				// 500 ## $a Tekijähuomautus: eka nimi ja/tai: toka nimi.
 				let combination = null;
-				if(person.match(/\sja\/tai\s/)){
-					combination = "ja/tai";
-				}else if(person.match(/\stai\s/)){
-					combination = "tai";
+				if (person.match(/\sja\/tai\s/)) {
+					combination = 'ja/tai';
+				} else if (person.match(/\stai\s/)) {
+					combination = 'tai';
 				}
-				if(combination !== null){
-					console.log("*** Combination: ", person)
+
+				if (combination !== null) {
+					console.log('*** Combination: ', person);
 					marcRecord.insertField({
 						tag: '500',
 						ind1: '',
 						ind2: '',
 						subfields: [{
 							code: 'a',
-							value: 'Tekijähuomautus: ' + elements[0] + combiination + elements[1]
+							value: 'Tekijähuomautus: ' + elements[0] + combination + elements[1]
 						}]
 					});
 				}
-				
 
-			
-			// ToDo:
-			// Mahdollisesti poimittu tekijähuomautus
-			// 500 ## Tekijähuomautus: eka nimi ja/tai: toka nimi.
+				// ToDo:
+				// Mahdollisesti poimittu tekijähuomautus
+				// 500 ## Tekijähuomautus: eka nimi ja/tai: toka nimi.
 
-			// Poistetaan eka tekijä listasta. Loppujen 7X0-kenttään menevien tekijöiden käsittely 
-			// kuvattu kenttien 190- ja 191-yhteydessä.
+				// Poistetaan eka tekijä listasta. Loppujen 7X0-kenttään menevien tekijöiden käsittely
+				// kuvattu kenttien 190- ja 191-yhteydessä.
 			}
-		}	
+		}
 	});
 }
 
@@ -1701,44 +1696,150 @@ export function handle141(fonoMap, marcRecord, Logger) {
 // *********************
 
 // ToDo: inconsistency with 505 and 245
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// TODO - Do this!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 export function handle150(fonoMap, marcRecord, Logger) {
 	let data150 = fonoMap.getAllCombined('150');
-	if (data150 === false) {
-		Logger.log('info', 'Invalid 150 field: does not exist');
-		return;
+	let data151 = fonoMap.getAllCombined('151');
+	let data = combineAll(data1, data2); //Array of records
+
+	function combineAll(data1, data2) {
+		let data = data1 + data2;
+		
+		console.log("data: ", data);
+
+		data = data.split(/\.\s\s/);
+
+		console.log("data: ", data);
+
+		// data.forEach(line => {
+		// 	if (data.length === 0 || line.match(/^\s/) || data.match(/\s$/)) {
+		// 		data += line;
+		// 	} else {
+		// 		data = data + ' ' + line;
+		// 	}
+		// });
 	}
-
-	// console.log('-------------------------');
-	// console.log(data150);
-
-	// Emot
-	// ensimmäinen rivi -> 245 10 $a – ks. Artikkeleiden ohitus
-	// Artikkelit pilkulla erotettuna nimekkeen perässä, konvertoidaan nimekkeen alkuun – esim. 150Old rugged cross, The -> 245 14 $a The old rugged cross
-	// NV: Tässä voidaan olla 130->245-kohtaa liberaalimpia: jos lopussa pilkku ja näyttää artikkelilta, niin siirretään artikkeli ja asetetaan 245 ind2 siirretyn merkkijonon pituuden perusteella (+1).
-
-	// lisätään aina 245 $a-kentän jälkeen $h [Äänite]
-	// muut rivit: jos sulkeet ja lopussa viiva (-) -> 031 ## $t, sulkeet ja loppuviiva pois
-
-	// jos sulkeet ja yhtäläisyysmerkki (=) -> = 245 $b, sulkeet ja = pois
-	// jos sulkeet ilman = ja - -> 500 ## $a, sulkeet pois, iso alkukirjain
-
-	// if (fonoMap.main()) {
-	// Osakohteet
-	// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
-	// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
-	// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
+	// if (data150 === false) {
+	// 	Logger.log('info', 'Invalid 150 field: does not exist');
+	// 	return;
 	// }
 
-	// 505 0_ $a xxxx ; xxxx ; xxxx.
-	// Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa
-	// tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
-	// ToDo: jos kenttä on jo muodostettu 150-kentästä, tämä sen jatkoksi – harvinaista
-	let data = data150.replace(/\.\s{2}/g, ' ; ');
-	data = data.replace(/\.$/, '');
+	// let data = data150.replace(/\.\s{2}/g, ' ; ');
+	// data = data.replace(/\.$/, '');
 
+	console.log('******** 150 handling ********');
+	console.log(marcRecord.fields);
+	console.log('------------------');
+	console.log(marcRecord.getFields('245'));
+	console.log('------------------');
+	console.log('Data150: ', data150);
+	console.log('------------------');
+	console.log('Data151: ', data151);
+	console.log('------------------');
+
+	//let data = data150[0].split(/.\s\s/).filter(n => n); //ToDo: split teos, rivi, comments below
+	//console.log('Data: ', data);
+	console.log('************************');
+
+	// Emot
+	if (fonoMap.main()) {
+		// Jos Fonon 130-kentästä ei saatu Marcin 245-kenttää:
+		// ensimmäinen 150- ja 151-kenttien 1. rivi -> 245 10 $a – ks. Artikkeleiden ohitus
+		if (marcRecord.getFields('245').length === 0) {
+			console.log("Does not contain 245")
+			if (data150.length >= 0) {
+				marcRecord.insertField({
+					tag: '245',
+					ind1: '1',
+					ind2: '0',
+					subfields: [{
+						code: 'a',
+						value: data150[0]
+					}]
+				});
+			}
+
+			if (data151.length >= 0) {
+				marcRecord.insertField({
+					tag: '245',
+					ind1: '1',
+					ind2: '0',
+					subfields: [{
+						code: 'a',
+						value: data151[0]
+					}]
+				});
+			}
+		}
+
+		// ToDo: Documentations "1. Rivi", old transformations copy first "line" (to first '.')
+		// to field 245, but then also to 505. How "rivi" is supposed to be interpret,
+		// term "teos" used documenting split.
+
+		// Jäljelle jääneet rivit (lähinnä 151:stä):
+
+		// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
+
+		//  Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
+		let input = '';
+
+		if (data150.length >= 2) {
+			input = combineRest(input, data150);
+		}
+
+		if (data151.length >= 2) {
+			input = combineRest(input, data151);
+		}
+		console.log("Input: ", input)
+
+		if (input) {
+			console.log('*************************');
+			console.log('Input: ', input);
+			console.log('*************************');
+
+			marcRecord.insertField({
+				tag: '505',
+				ind1: '0',
+				ind2: '',
+				subfields: [{
+					code: 'a',
+					value: input
+				}]
+			});
+		}
+
+	} else {
+		// Osakohteet ja 150:n arvo sisältää lauluja
+		// _Tämä on oikeastaan niin monimutkainen, ettei sitä voi kunnolla speksata, vaan pitää reverse engineerata..._
+		console.log('*************************');
+		console.log('Complex, todo');
+		console.log('*************************');
+
+		// Hakuaputiedot
+
+		// 500 ## $a Hakuapu: sisältö.
+
+		// Tämä on oikeastaan niin monimutkainen, ettei sitä voi kunnolla speksata...
+
+		// Medleyden palastelu...
+
+		// muut rivit: jos sulkeet ja lopussa viiva (-) -> 031 ## $t, sulkeet ja loppuviiva pois
+
+		// jos sulkeet ja yhtäläisyysmerkki (=) -> = 245 $b, sulkeet ja = pois
+		// jos sulkeet ilman = ja - -> 500 ## $a, sulkeet pois, iso alkukirjain
+		// tark. taidemusiikin moniriviset nimekkeet! esim.:
+
+		// Näin:
+
+		// ensimmäinen 150-rivi 245 $a, muut kaksoispisteen jälkeen kenttään 245 $b.
+
+		// 1501, 1502 jne. kenttään
+
+		// 505 0# $a Osat: 15001-rivin teksti ; 15002-rivin teksti ; 15003-rivin teksti ; 15004-
+
+		// rivin teksti.
+	}
+}
+/*
 	marcRecord.insertField({
 		tag: '505',
 		ind1: '0',
@@ -1748,61 +1849,7 @@ export function handle150(fonoMap, marcRecord, Logger) {
 			value: data
 		}]
 	});
-
-	// Emot:
-	// 150Moorland elegies, sarja sekakuorolle ja jousiorkesterille.
-	// 150Walkuere, Die (Valkyyria), ooppera: 1. näytös kokonaan.
-
-	// 150Tuntematon sotilas
-	// 150elokuva (Suomi 2017); ohjaaja: Louhimies, Aku (soundtrack).
-
-	// Teoksia:
-	// 150Rocktown special
-	// 150L. A. woman
-
-	// 1508 foot Joe
-	// 150(hakuapu: Eight foot Joe).
-
-
-	// 150Jenkki purukumi
-	// 150(Hi there Jenkki lovers -).
-
-	// 150Kätkävaaran lohikäärme
-	// 150(Dragon of Kätkävaara, The)
-
-	// 150Ensimmäinen aamu
-	// 150(First morning).
-
-	// 150Konsertto pianolle ja orkesterille.
-	// 15001  1. (attacca) /7:43.
-	// 15002  - 2. /12:59.
-	// 15003  3. /9:34.
-
-	// 150Konsertto sellolle ja orkesterille.
-	// 15004  1. /9:51.
-	// 15005  2. /10:53.
-	// 15006  3. /2:05.
-	// 15007  Sonate 1-2-3 (sellolle ja pianolle) (attacca) /2:55.
-	// 15008  - La plus que lente /7:38.
-
-	// 1501. Kuortaneen menuetti.  -
-	// 1502. Slängpolska efter Juringius.
-
-	// 500 ## $a etutekstillä: Tekijähuomautus:
-	// data150.forEach(function(line) {
-	// console.log('Line: ', line);
-
-	// marcRecord.insertField({
-	// 	tag: '505',
-	// 	ind1: '0',
-	// 	ind2: '',
-	// 	subfields:[{
-	// 		code: 'a',
-	// 		value: 'Tekijähuomautus: ' + line
-	// 	}]
-	// });
-	// });
-}
+*/
 
 // Aanitteet / Emot
 // 151Mun miehen katse.  Rakastan sua yhtä paljon.  Venetsialainen ilta.
@@ -1964,12 +2011,13 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 	const data190 = fonoMap.getAllCombined('190');
 	const data191 = fonoMap.getAllCombined('191');
 
-	let data = "";
-	if(data190){
+	let data = '';
+	if (data190) {
 		data = data190;
 	}
-	if(data191){
-		data = data + data191;
+
+	if (data191) {
+		data += data191;
 	}
 
 	// console.log('---------- 190&191 ---------');
@@ -1984,10 +2032,10 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 
 	// 191: samalla tavalla kuin kenttä 190 – jos 511 on jo tehty Fonon 190:stä, tämä samaan kenttään jatkoksi
 	// 191: POIS kokonaan jos sisältää sanan joka alkaa ”yleistietodoku-”
-	
+
 	// Below specs for 190
-	// Jos Fonon kentässä on " ja/tai: " tai " tai: ", niin emon 1X0- tai poikasen 7X0-kenttään, 
-	// päätyy vain tätä edeltänyt osa. Loppuosa talletetaan 500-kenttään. Sinne tehdään merkintä, 
+	// Jos Fonon kentässä on " ja/tai: " tai " tai: ", niin emon 1X0- tai poikasen 7X0-kenttään,
+	// päätyy vain tätä edeltänyt osa. Loppuosa talletetaan 500-kenttään. Sinne tehdään merkintä,
 	// jossa myös vaihtoehtoinen/rinnakkainen/marginaalinen/outo/whatever tekijä on mukana tyyliin:
 
 	// 500 ## $a Tekijähuomautus: eka nimi ja/tai: toka nimi.
@@ -2008,14 +2056,13 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 				}]
 			});
 
-
-			if(ind === 0){
+			if (ind === 0) {
 				// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
 				// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
 				// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
-				person = person.replace(/\([^()]*\)/g, '').filter(n => n)
+				person = person.replace(/\([^()]*\)/g, '');
 
-				if(person.match(/,/)){
+				if (person.match(/,/)) {
 					marcRecord.insertField({
 						tag: '100',
 						ind1: '1',
@@ -2023,12 +2070,12 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 						subfields: [{
 							code: 'a',
 							value: person + ','
-						},{
+						}, {
 							code: 'e',
-							value: "esittäjä."
+							value: 'esittäjä.'
 						}]
 					});
-				}else{
+				} else {
 					marcRecord.insertField({
 						tag: '110',
 						ind1: '2',
@@ -2036,14 +2083,14 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 						subfields: [{
 							code: 'a',
 							value: person + ','
-						},{
+						}, {
 							code: 'e',
-							value: "esittäjä."
+							value: 'esittäjä.'
 						}]
 					});
 				}
 			}
-		}else{
+		} else {
 			// Below specs for 190
 			// Osakohteet
 			// 511 0_ $a sellaisenaan
@@ -2063,9 +2110,9 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 			person = person.replace(/\([^()]*\)/g, '').filter(n => n);
 
 			// Nimeämätön -> ei 700/710
-			if(person.match(/nimeämät/i)){
-				Logger.log('warn', 'Field 19* handling encountered person matching "nimeämät"')
-			}else if(person.match(/,/)){
+			if (person.match(/nimeämät/i)) {
+				Logger.log('warn', 'Field 19* handling encountered person matching "nimeämät"');
+			} else if (person.match(/,/)) {
 				marcRecord.insertField({
 					tag: '700',
 					ind1: '1',
@@ -2073,12 +2120,12 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 					subfields: [{
 						code: 'a',
 						value: person + ','
-					},{
+					}, {
 						code: 'e',
-						value: "esittäjä."
+						value: 'esittäjä.'
 					}]
 				});
-			}else{
+			} else {
 				marcRecord.insertField({
 					tag: '710',
 					ind1: '2',
@@ -2086,9 +2133,9 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 					subfields: [{
 						code: 'a',
 						value: person + ','
-					},{
+					}, {
 						code: 'e',
-						value: "esittäjä."
+						value: 'esittäjä.'
 					}]
 				});
 			}
@@ -2136,7 +2183,7 @@ export function handle222(fonoMap, marcRecord, Logger, control008) {
 		// 008/07-10 yyyy + 260 ## $c pyyyy. – jos ei kenttää 224
 		if (!fonoMap.exists(224)) {
 			marcRecord.insertField({
-				tag: '260',
+				tag: '264',
 				ind1: '',
 				ind2: '',
 				subfields: [{
