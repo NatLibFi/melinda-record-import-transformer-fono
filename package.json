@@ -41,6 +41,7 @@
 		"@natlibfi/melinda-commons": "^7.0.0",
 		"@natlibfi/melinda-record-import-commons": "^4.2.0",
 		"get-stream": "^5.1.0",
+		"langs": "^2.0.0",
 		"moment": "^2.22.2"
 	},
 	"devDependencies": {

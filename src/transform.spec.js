@@ -76,31 +76,34 @@ describe('transform - from files', () => {
 						// record = record.replace(/\r\n$/, ''); // Remove possible extra linebreaks at end of string
 						lines.map(generateMapLine);
 						testContext.appendMap(fonoMap);
-
+						let main = fonoMap.main() ? 'main:':'sub'
 						// console.log('******************************')
 						// console.log('Fonomap: ', fonoMap)
 						// console.log('Record: ', record)
 						// console.log('******************************')
 
 						// eslint-disable-next-line complexity
-						it('General Test', async function () {
-							record = '***' + record;
-							const s = new Readable();
-							s.push(Buffer.from(record, 'utf8'));
-							s.push(null);
-							let transformed = await testContext.default(s);
+						// it('General Test', async function () {
+						// 	record = '***' + record;
+						// 	const s = new Readable();
+						// 	s.push(Buffer.from(record, 'utf8'));
+						// 	s.push(null);
+						// 	let transformed = await testContext.default(s);
 
-							console.log('-------- transformed ----------');
-							console.log('leader: ', transformed[0].leader);
-							console.log(transformed[0].fields);
-							console.log('-------- expectedOutput ----------');
-							console.log(expectedOutput[ind]);
+						// 	console.log('-------- transformed ----------');
+						// 	console.log('leader: ', transformed[0].leader);
+						// 	console.log(transformed[0].fields);
+						// 	console.log('-------- expectedOutput ----------');
+						// 	console.log(expectedOutput[ind]);
 
-							expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
-							expect(transformed[0].fields).to.eql(expectedOutput[ind].fields);
-						});
+						// 	expect(transformed[0].leader).to.eql(expectedOutput[ind].leader);
+						// 	expect(transformed[0].fields).to.eql(expectedOutput[ind].fields);
+						// });
 
-						describe('Specific tests:', () => {
+						// console.log("----- Marc -----")
+						// console.log(JSON.stringify(marcRecord, null, 2)); 
+
+						describe('Specific tests - ' + main, () => {
 							beforeEach(() => {
 								marcRecord = new MarcRecord();
 								data = null;

@@ -33,6 +33,7 @@ import moment from 'moment';
 import getStream from 'get-stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
+import langs from 'langs';
 
 const {createLogger} = Utils;
 // console.log('--------------------');
@@ -1699,103 +1700,45 @@ export function handle141(fonoMap, marcRecord, Logger) {
 export function handle150(fonoMap, marcRecord, Logger) {
 	let data150 = fonoMap.getAllCombined('150');
 	let data151 = fonoMap.getAllCombined('151');
-	let data = combineAll(data1, data2); //Array of records
+	let data = combineAll(data150, data151); //Array of records
 
 	function combineAll(data1, data2) {
-		let data = data1 + data2;
-		
-		console.log("data: ", data);
+		let data = '';
+		if(data1) { // Ternary ok for lint?
+			data += data1;
+		}
 
-		data = data.split(/\.\s\s/);
+		if(data2) {
+			data += data2;
+		}
 
-		console.log("data: ", data);
-
-		// data.forEach(line => {
-		// 	if (data.length === 0 || line.match(/^\s/) || data.match(/\s$/)) {
-		// 		data += line;
-		// 	} else {
-		// 		data = data + ' ' + line;
-		// 	}
-		// });
+		return data.split(/\.\s\s/);
 	}
-	// if (data150 === false) {
-	// 	Logger.log('info', 'Invalid 150 field: does not exist');
-	// 	return;
-	// }
 
-	// let data = data150.replace(/\.\s{2}/g, ' ; ');
-	// data = data.replace(/\.$/, '');
-
-	console.log('******** 150 handling ********');
-	console.log(marcRecord.fields);
-	console.log('------------------');
-	console.log(marcRecord.getFields('245'));
-	console.log('------------------');
-	console.log('Data150: ', data150);
-	console.log('------------------');
-	console.log('Data151: ', data151);
-	console.log('------------------');
-
-	//let data = data150[0].split(/.\s\s/).filter(n => n); //ToDo: split teos, rivi, comments below
-	//console.log('Data: ', data);
-	console.log('************************');
 
 	// Emot
 	if (fonoMap.main()) {
 		// Jos Fonon 130-kentästä ei saatu Marcin 245-kenttää:
 		// ensimmäinen 150- ja 151-kenttien 1. rivi -> 245 10 $a – ks. Artikkeleiden ohitus
-		if (marcRecord.getFields('245').length === 0) {
-			console.log("Does not contain 245")
-			if (data150.length >= 0) {
-				marcRecord.insertField({
-					tag: '245',
-					ind1: '1',
-					ind2: '0',
-					subfields: [{
-						code: 'a',
-						value: data150[0]
-					}]
-				});
-			}
+		if (marcRecord.getFields('245').length === 0 && data.length >= 0) {
+			marcRecord.insertField({
+				tag: '245',
+				ind1: '1',
+				ind2: '0',
+				subfields: [{
+					code: 'a',
+					value: data150[0]
+				}]
+			});
 
-			if (data151.length >= 0) {
-				marcRecord.insertField({
-					tag: '245',
-					ind1: '1',
-					ind2: '0',
-					subfields: [{
-						code: 'a',
-						value: data151[0]
-					}]
-				});
-			}
+			data.shift(1); //Remove first element
 		}
-
-		// ToDo: Documentations "1. Rivi", old transformations copy first "line" (to first '.')
-		// to field 245, but then also to 505. How "rivi" is supposed to be interpret,
-		// term "teos" used documenting split.
 
 		// Jäljelle jääneet rivit (lähinnä 151:stä):
-
 		// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
-
 		//  Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
-		let input = '';
-
-		if (data150.length >= 2) {
-			input = combineRest(input, data150);
-		}
-
-		if (data151.length >= 2) {
-			input = combineRest(input, data151);
-		}
-		console.log("Input: ", input)
-
-		if (input) {
-			console.log('*************************');
-			console.log('Input: ', input);
-			console.log('*************************');
-
+		if (data.length > 0 ) {
+			let input = data.join(' ; ');
 			marcRecord.insertField({
 				tag: '505',
 				ind1: '0',
@@ -1806,7 +1749,6 @@ export function handle150(fonoMap, marcRecord, Logger) {
 				}]
 			});
 		}
-
 	} else {
 		// Osakohteet ja 150:n arvo sisältää lauluja
 		// _Tämä on oikeastaan niin monimutkainen, ettei sitä voi kunnolla speksata, vaan pitää reverse engineerata..._
@@ -1934,19 +1876,19 @@ export function handle170(fonoMap, marcRecord, Logger, control008) {
 
 	let code = getGenre(data170, Logger);
 
-	// 084 ## $a nnn $2 ykl
-	marcRecord.insertField({
-		tag: '084',
-		ind1: '',
-		ind2: '',
-		subfields: [{
-			code: 'a',
-			value: code
-		}, {
-			code: '2',
-			value: 'ykl'
-		}]
-	});
+	// // 084 ## $a nnn $2 ykl
+	// marcRecord.insertField({
+	// 	tag: '084',
+	// 	ind1: '',
+	// 	ind2: '',
+	// 	subfields: [{
+	// 		code: 'a',
+	// 		value: code
+	// 	}, {
+	// 		code: '2',
+	// 		value: 'ykl'
+	// 	}]
+	// });
 
 	// 008/18-19
 	if (code.length === 2) {
@@ -2040,31 +1982,77 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 
 	// 500 ## $a Tekijähuomautus: eka nimi ja/tai: toka nimi.
 
+	let output = '';
 	let persons = data.split(/\./).filter(n => n); // Split each person to array
 	persons.forEach((person, ind) => {
-		if (fonoMap.main()) {
-			// Below specs for 190
-			// Emot
-			// 511 0_ $a sellaisenaan
-			marcRecord.insertField({
-				tag: '511',
-				ind1: '0',
-				ind2: '',
-				subfields: [{
-					code: 'a',
-					value: person
-				}]
-			});
+		if ( !person.match(/yleistietodoku/) ){
+			if (fonoMap.main()) {
+				// Below specs for 190
+				if (ind === 0) {
+					// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
+					// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
+					// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
+					if (person.match(/,/)) {
+						marcRecord.insertField({
+							tag: '100',
+							ind1: '1',
+							ind2: '',
+							subfields: [{
+								code: 'a',
+								value:  person.replace(/\([^()]*\)/g, '').trim() + ','
+							}, {
+								code: 'e',
+								value: 'esittäjä.'
+							}]
+						});
+					} else {
+						marcRecord.insertField({
+							tag: '110',
+							ind1: '2',
+							ind2: '',
+							subfields: [{
+								code: 'a',
+								value:  person.replace(/\([^()]*\)/g, '').trim() + ','
+							}, {
+								code: 'e',
+								value: 'esittäjä.'
+							}]
+						});
+					}
+				}
 
-			if (ind === 0) {
-				// ensimmäisen rivin esittäjä 100 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
-				// 110 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
-				// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 100/110-kentistä
-				person = person.replace(/\([^()]*\)/g, '');
+				// Emot
+				// 511 0_ $a sellaisenaan
+				person = person.replace(/[Jj]äsenet:/, '').trim();
+				if (person.match(/\(yhtye\)$/i)) {
+					output += person + ': ';
+				}else if( !person.match(/[.:,]$/)) {
+					output += person + '. ';
+				} else {
+					output += person;
+				}
 
-				if (person.match(/,/)) {
+			} else {
+				// Below specs for 190
+				// Osakohteet
+				// 511 0_ $a sellaisenaan
+				if( !person.match(/[.:,]$/)) {
+					output += person + '. ';
+				} else {
+					output += person;
+				}
+
+				// lisäksi jokainen nimi 700 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
+				// 710 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
+				// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 700/710-kentistä
+				person = person.replace(/\([^()]*\)/g, '').trim();
+
+				// Nimeämätön -> ei 700/710
+				if (person.match(/nimeämät/i)) {
+					Logger.log('warn', 'Field 19* handling encountered person matching "nimeämät"');
+				} else if (person.match(/,/)) {
 					marcRecord.insertField({
-						tag: '100',
+						tag: '700',
 						ind1: '1',
 						ind2: '',
 						subfields: [{
@@ -2077,7 +2065,7 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 					});
 				} else {
 					marcRecord.insertField({
-						tag: '110',
+						tag: '710',
 						ind1: '2',
 						ind2: '',
 						subfields: [{
@@ -2089,59 +2077,24 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 						}]
 					});
 				}
+				// ks. Artikkelien ohitus
 			}
-		} else {
-			// Below specs for 190
-			// Osakohteet
-			// 511 0_ $a sellaisenaan
-			marcRecord.insertField({
-				tag: '511',
-				ind1: '0',
-				ind2: '',
-				subfields: [{
-					code: 'a',
-					value: person
-				}]
-			});
-
-			// lisäksi jokainen nimi 700 1# $a nnn, nnn, $e esitt. (jos nimessä pilkku)
-			// 710 2# $a nnn, $e esitt. (jos nimessä ei pilkkua)
-			// nimen jäljessä suluissa olevat soittimet ym. jätetään pois 700/710-kentistä
-			person = person.replace(/\([^()]*\)/g, '').filter(n => n);
-
-			// Nimeämätön -> ei 700/710
-			if (person.match(/nimeämät/i)) {
-				Logger.log('warn', 'Field 19* handling encountered person matching "nimeämät"');
-			} else if (person.match(/,/)) {
-				marcRecord.insertField({
-					tag: '700',
-					ind1: '1',
-					ind2: '',
-					subfields: [{
-						code: 'a',
-						value: person + ','
-					}, {
-						code: 'e',
-						value: 'esittäjä.'
-					}]
-				});
-			} else {
-				marcRecord.insertField({
-					tag: '710',
-					ind1: '2',
-					ind2: '',
-					subfields: [{
-						code: 'a',
-						value: person + ','
-					}, {
-						code: 'e',
-						value: 'esittäjä.'
-					}]
-				});
-			}
-			// ks. Artikkelien ohitus
 		}
 	});
+
+	output = output.trim();
+
+	if (output) {
+		marcRecord.insertField({
+			tag: '511',
+			ind1: '0',
+			ind2: '',
+			subfields: [{
+				code: 'a',
+				value: output
+			}]
+		});
+	}
 }
 
 export function handle200(fonoMap, marcRecord, Logger) {
@@ -2151,15 +2104,23 @@ export function handle200(fonoMap, marcRecord, Logger) {
 		return;
 	}
 
+	//ToDo, jatka tästä kielikoodien hakemisella
+	//langs ei selviä "englanti", tunnistaa vain paikallisen ja englanniksi
+	// console.log("data200", data200)
+	// console.log("---------", data200)
+	// console.log("langs: ", langs)
+	// console.log("test: ", langs.where("name", "english")['2B'])
+	// console.log("Lang: ", langs.where("name", data200)['2B']);
+
 	// 008/35-37 + 041 ## $d ks. ylekoodit
 	// Artturi: laita 041, 008 tyhjää -> validaattori lisää 008:n koodin 041:n perusteella.
 	marcRecord.insertField({
-		tag: '500',
+		tag: '41',
 		ind1: '',
 		ind2: '',
 		subfields: [{
-			code: 'a',
-			value: 'Aihepiiri:' + data200
+			code: 'd',
+			value: data200
 		}]
 	});
 }
@@ -2495,7 +2456,7 @@ function getGenre(data, Logger) {
 			return 'mp';
 		default:
 			Logger.log('warn', `getGenre(): genre code ${data} not identified`);
-			return '  ';
+			return '';
 	}
 }
 
