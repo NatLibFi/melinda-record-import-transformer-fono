@@ -33,10 +33,9 @@ import moment from 'moment';
 import getStream from 'get-stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
-import langs from 'langs';
+import {LANGUAGES_FINNISH} from './data/languages';
 
 const {createLogger} = Utils;
-// console.log('--------------------');
 
 export default async function (stream) {
 	MarcRecord.setValidationOptions({subfieldValues: false});
@@ -107,8 +106,7 @@ export default async function (stream) {
 		handle130(fonoMap, marcRecord, Logger); // 06 Weird ' -' in the end of subfields in expected
 		handle140(fonoMap, marcRecord, Logger); // 08 Reworked solution, needs testing, connected to 140, ToDo: Viola
 		handle141(fonoMap, marcRecord, Logger); // Ok
-		handle150(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245 // _Tämä on oikeastaan niin monimutkainen, ettei sitä voi kunnolla speksata, vaan pitää reverse engineerata..._
-		handle151(fonoMap, marcRecord, Logger); // Ok
+		handle150and151(fonoMap, marcRecord, Logger); // ToDo: inconsistency with 505 and 245 // _Tämä on oikeastaan niin monimutkainen, ettei sitä voi kunnolla speksata, vaan pitää reverse engineerata..._
 		handle162(fonoMap, marcRecord, Logger);
 		handle170(fonoMap, marcRecord, Logger, control008);
 		handle175(fonoMap, marcRecord, Logger); // Ok
@@ -1697,24 +1695,28 @@ export function handle141(fonoMap, marcRecord, Logger) {
 // *********************
 
 // ToDo: inconsistency with 505 and 245
-export function handle150(fonoMap, marcRecord, Logger) {
+export function handle150and151(fonoMap, marcRecord, Logger) {
 	let data150 = fonoMap.getAllCombined('150');
 	let data151 = fonoMap.getAllCombined('151');
-	let data = combineAll(data150, data151); //Array of records
+	let data = combineAll(data150, data151); // Array of records
 
 	function combineAll(data1, data2) {
 		let data = '';
-		if(data1) { // Ternary ok for lint?
+		if (!data1 && !data2) {
+			Logger.log('info', '150&151 field: fields empty');
+			return;
+		}
+
+		if (data1) { // Ternary ok for lint?
 			data += data1;
 		}
 
-		if(data2) {
+		if (data2) {
 			data += data2;
 		}
 
 		return data.split(/\.\s\s/);
 	}
-
 
 	// Emot
 	if (fonoMap.main()) {
@@ -1731,13 +1733,13 @@ export function handle150(fonoMap, marcRecord, Logger) {
 				}]
 			});
 
-			data.shift(1); //Remove first element
+			data.shift(1); // Remove first element
 		}
 
 		// Jäljelle jääneet rivit (lähinnä 151:stä):
 		// 505 0# $a Xxxx ; Xxxx ; Xxxx ; Xxxx.
 		//  Fonossa piste ja kaksi tyhjämerkkiä erottaa eri teokset -> korvataan Violassa tyhjämerkki puolipiste tyhjämerkki –yhdistelmällä
-		if (data.length > 0 ) {
+		if (data.length > 0) {
 			let input = data.join(' ; ');
 			marcRecord.insertField({
 				tag: '505',
@@ -1807,29 +1809,29 @@ export function handle150(fonoMap, marcRecord, Logger) {
 
 // 151Säveltäjä tehnyt kuorosovituksen sävelrunostaan Finlandia, op.26
 // 151orkesterille v:lta 1900.
-export function handle151(fonoMap, marcRecord, Logger) {
-	const data151 = fonoMap.getAllCombined('151');
-	if (data151 === false) {
-		Logger.log('info', 'Invalid 151 field: does not exist');
-		return;
-	}
+// export function handle151(fonoMap, marcRecord, Logger) {
+// 	const data151 = fonoMap.getAllCombined('151');
+// 	if (data151 === false) {
+// 		Logger.log('info', 'Invalid 151 field: does not exist');
+// 		return;
+// 	}
 
-	// Emot
-	// käsitellään samalla kuin Fonon 150-kenttä
-	// Osakohteet
-	// 500 ## $a sellaisenaan
-	if (!fonoMap.main()) {
-		marcRecord.insertField({
-			tag: '500',
-			ind1: '',
-			ind2: '',
-			subfields: [{
-				code: 'a',
-				value: data151
-			}]
-		});
-	}
-}
+// 	// Emot
+// 	// käsitellään samalla kuin Fonon 150-kenttä
+// 	// Osakohteet
+// 	// 500 ## $a sellaisenaan
+// 	if (!fonoMap.main()) {
+// 		marcRecord.insertField({
+// 			tag: '500',
+// 			ind1: '',
+// 			ind2: '',
+// 			subfields: [{
+// 				code: 'a',
+// 				value: data151
+// 			}]
+// 		});
+// 	}
+// }
 
 export function handle162(fonoMap, marcRecord, Logger) {
 	const data162 = fonoMap.getSingle('162');
@@ -1985,7 +1987,7 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 	let output = '';
 	let persons = data.split(/\./).filter(n => n); // Split each person to array
 	persons.forEach((person, ind) => {
-		if ( !person.match(/yleistietodoku/) ){
+		if (!person.match(/yleistietodoku/)) {
 			if (fonoMap.main()) {
 				// Below specs for 190
 				if (ind === 0) {
@@ -1999,7 +2001,7 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 							ind2: '',
 							subfields: [{
 								code: 'a',
-								value:  person.replace(/\([^()]*\)/g, '').trim() + ','
+								value: person.replace(/\([^()]*\)/g, '').trim() + ','
 							}, {
 								code: 'e',
 								value: 'esittäjä.'
@@ -2012,7 +2014,7 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 							ind2: '',
 							subfields: [{
 								code: 'a',
-								value:  person.replace(/\([^()]*\)/g, '').trim() + ','
+								value: person.replace(/\([^()]*\)/g, '').trim() + ','
 							}, {
 								code: 'e',
 								value: 'esittäjä.'
@@ -2026,17 +2028,16 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 				person = person.replace(/[Jj]äsenet:/, '').trim();
 				if (person.match(/\(yhtye\)$/i)) {
 					output += person + ': ';
-				}else if( !person.match(/[.:,]$/)) {
+				} else if (person.match(/[^.:,]$/)) {
 					output += person + '. ';
 				} else {
 					output += person;
 				}
-
 			} else {
 				// Below specs for 190
 				// Osakohteet
 				// 511 0_ $a sellaisenaan
-				if( !person.match(/[.:,]$/)) {
+				if (person.match(/[^.:,]$/)) {
 					output += person + '. ';
 				} else {
 					output += person;
@@ -2098,24 +2099,20 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 }
 
 export function handle200(fonoMap, marcRecord, Logger) {
-	const data200 = fonoMap.getSingle('200');
+	let data200 = fonoMap.getSingle('200');
 	if (data200 === false) {
 		Logger.log('info', '200 field: does not exist, or multiple fields');
 		return;
 	}
 
-	//ToDo, jatka tästä kielikoodien hakemisella
-	//langs ei selviä "englanti", tunnistaa vain paikallisen ja englanniksi
-	// console.log("data200", data200)
-	// console.log("---------", data200)
-	// console.log("langs: ", langs)
-	// console.log("test: ", langs.where("name", "english")['2B'])
-	// console.log("Lang: ", langs.where("name", data200)['2B']);
+	if (LANGUAGES_FINNISH.has(data200)) {
+		data200 = LANGUAGES_FINNISH.get(data200);
+	}
 
 	// 008/35-37 + 041 ## $d ks. ylekoodit
 	// Artturi: laita 041, 008 tyhjää -> validaattori lisää 008:n koodin 041:n perusteella.
 	marcRecord.insertField({
-		tag: '41',
+		tag: '041',
 		ind1: '',
 		ind2: '',
 		subfields: [{

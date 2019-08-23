@@ -35,7 +35,7 @@ import sinonChai from 'sinon-chai';
 import * as testContext from './transform';
 import {Utils} from '@natlibfi/melinda-commons';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {Readable} from 'stream';
+// import {Readable} from 'stream';
 
 const {createLogger} = Utils;
 chai.use(sinonChai);
@@ -76,7 +76,7 @@ describe('transform - from files', () => {
 						// record = record.replace(/\r\n$/, ''); // Remove possible extra linebreaks at end of string
 						lines.map(generateMapLine);
 						testContext.appendMap(fonoMap);
-						let main = fonoMap.main() ? 'main:':'sub'
+						let main = fonoMap.main() ? 'main:' : 'sub';
 						// console.log('******************************')
 						// console.log('Fonomap: ', fonoMap)
 						// console.log('Record: ', record)
@@ -101,7 +101,7 @@ describe('transform - from files', () => {
 						// });
 
 						// console.log("----- Marc -----")
-						// console.log(JSON.stringify(marcRecord, null, 2)); 
+						// console.log(JSON.stringify(marcRecord, null, 2));
 
 						describe('Specific tests - ' + main, () => {
 							beforeEach(() => {
@@ -170,14 +170,8 @@ describe('transform - from files', () => {
 							});
 
 							it('150', done => {
-								testContext.handle130(fonoMap, marcRecord, Logger); //F130 generates M245 used in F150
-								testContext.handle150(fonoMap, marcRecord, Logger);
-								expect(matchSubfields(marcRecord)).to.eql(true);
-								done();
-							});
-
-							it('151', done => {
-								testContext.handle151(fonoMap, marcRecord, Logger);
+								testContext.handle130(fonoMap, marcRecord, Logger); // F130 generates M245 used in F150
+								testContext.handle150and151(fonoMap, marcRecord, Logger);
 								expect(matchSubfields(marcRecord)).to.eql(true);
 								done();
 							});
