@@ -1411,14 +1411,7 @@ export function handle130(fonoMap, marcRecord, Logger) {
 				line += '.';
 			}
 
-			if (fonoMap.main()) {
-				// Emo: eka rivi 245 00 $a pienaakkosilla – ks. Artikkeleiden ohitus
-				tag.subfields.push({code: 'a', value: line});
-			} else {
-				// Osakohteet: 773 $t – vain eka rivi pienaakkosilla
-				tag.tag = '773';
-				tag.subfields.push({code: 't', value: line}); // ToDo: in expected 'Queen of hell. - '
-			}
+			tag.subfields.push({code: 'a', value: line});
 		} else {
 			// Toinen ja seuraavat rivit 245 osakenttään $b, osakenttää $b edeltää tyhjämerkki, kaksoispiste, tyhjämerkki ( : )
 			tag.subfields.push({code: 'b', value: ' : ' + line});
@@ -2155,7 +2148,7 @@ export function handle222(fonoMap, marcRecord, Logger, control008) {
 			Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
 		}
 
-	// Jos on 224: 534 ## $p Alun perin julkaistu: $c pyyyy.
+	// Jos on 224: 534 ## $p Alun perin julkaistu: $n  © yyyy.
 	} else if (fonoMap.exists(224)) {
 		marcRecord.insertField({
 			tag: '534',
@@ -2163,28 +2156,15 @@ export function handle222(fonoMap, marcRecord, Logger, control008) {
 			ind2: '',
 			subfields: [{
 				code: 'p',
-				value: 'Alun perin julkaistu:' + year[1]
+				value: 'Alun perin julkaistu:'
 			}, {
-				code: 'c',
-				value: 'p' + year[1]
-			}]
-		});
-	} else {
-		// Osakohteet
-		// 008/07-10 yyyy + 773 $d pyyyy – jos ei kenttää 224
-		marcRecord.insertField({
-			tag: '773',
-			ind1: '',
-			ind2: '',
-			subfields: [{
-				code: 'd',
-				value: 'p' + year[1]
+				code: 'n',
+				value: '©' + year[1] + '.'
 			}]
 		});
 
-		if (!insertToControl(control008, 7, 4, year[1])) {
-			Logger.log('error', `222 field: failed to insert to control from '${data222}'`);
-		}
+		// ToDo
+		// tai monivuotiselle 500 ## $a Esitykset julkaistu alun perin: yyyy-yyyy.
 	}
 }
 
@@ -2308,7 +2288,7 @@ export function handle230(fonoMap, marcRecord, Logger) {
 	}
 
 	// Emot: 028 01 $b levymerkki $a tuotetunnus (lisätieto) - tuotetunnuksesta pois tyhjämerkit
-	if (!fonoMap.main()) {
+	if (fonoMap.main()) {
 		// console.log('-------- 230 --------');
 		// console.log('data: ', data230);
 
@@ -2393,6 +2373,13 @@ export function handle244(fonoMap, marcRecord, Logger, control008) {
 			}]
 		});
 	}
+}
+
+export function handle246(fonoMap, marcRecord, Logger, control008) {
+	const data246 = fonoMap.getAllCombined('246');
+
+	//ToDo
+
 }
 
 // eslint-disable-next-line complexity

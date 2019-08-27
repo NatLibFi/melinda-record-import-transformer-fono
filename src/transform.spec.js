@@ -256,6 +256,12 @@ describe('transform - from files', () => {
 								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
 								done();
 							});
+
+							it('244', done => {
+								testContext.handle246(fonoMap, marcRecord, Logger, data);
+								expect(matchSubfields(marcRecord)).to.eql(true);
+								done();
+							});
 						});
 
 						function generateMapLine(line) {
