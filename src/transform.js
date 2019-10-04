@@ -528,7 +528,7 @@ export function handle102and104(fonoMap, marcRecord, Logger, control007, control
 			});
 
 			// Jos Fonon 246 on verkkoaineistokoodi, niin
-			if (isOnlineMaterial()) {
+			if (isOnlineMaterial(fonoMap)) {
 				// 006 m||||| o||h||||||||
 				marcRecord.insertField({
 					tag: '006',
@@ -2375,13 +2375,6 @@ export function handle244(fonoMap, marcRecord, Logger, control008) {
 	}
 }
 
-export function handle246(fonoMap, marcRecord, Logger, control008) {
-	const data246 = fonoMap.getAllCombined('246');
-
-	//ToDo
-
-}
-
 // eslint-disable-next-line complexity
 function getGenre(data, Logger) {
 	switch (true) {
@@ -2548,9 +2541,11 @@ function getPubCountry(input, Logger) {
 	}
 }
 
-function isOnlineMaterial(input) {
+function isOnlineMaterial(fonoMap) {
+	const data246 = fonoMap.getSingle('246');
+
 	const onlineCodes = ['0222', '1153', '1156', '1157', '1158', '1159', '1160', '2115', '3141', '7062', '7063'];
-	if (onlineCodes.contains(input)) {
+	if (onlineCodes.contains(data246)) {
 		return true;
 	}
 

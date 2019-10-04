@@ -256,12 +256,6 @@ describe('transform - from files', () => {
 								expect(matchStructure(data, getExpectedField('008'), 'control008')).to.eql(true);
 								done();
 							});
-
-							it('244', done => {
-								testContext.handle246(fonoMap, marcRecord, Logger, data);
-								expect(matchSubfields(marcRecord)).to.eql(true);
-								done();
-							});
 						});
 
 						function generateMapLine(line) {
@@ -291,8 +285,9 @@ describe('transform - from files', () => {
 
 						// Checks if returned control/leader field structure matches fields from existing (expected) transformations
 						let matchStructure = function (input, expected, context) {
-							// console.log('input: ', input)
-							// console.log('expected: ', expected)
+							// console.log('input: ', input);
+							// console.log('expected: ', expected);
+							// console.log('ind: ', ind);
 
 							if (input === null || typeof (input) !== 'object') {
 								return false;
