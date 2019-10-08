@@ -42,7 +42,7 @@ chai.use(sinonChai);
 
 const FIXTURES_PATH = path.join(__dirname, '../test-fixtures/yleRecords/');
 const Logger = createLogger();
-let first = true;
+let first = true; // Temporary solution to limit tests that are run
 
 /* eslint-disable max-nested-callbacks */
 describe('transform - from files', () => {
@@ -52,11 +52,11 @@ describe('transform - from files', () => {
 				first = false;
 
 				// Read input:
-				let text = fs.readFileSync(path.join(FIXTURES_PATH, 'in', file), 'utf8');
-				let records = text.split(/^\*\*\*+/m).filter(n => n);
+				const text = fs.readFileSync(path.join(FIXTURES_PATH, 'in', file), 'utf8');
+				const records = text.split(/^\*\*\*+/m).filter(n => n);
 
 				// Read output
-				let expectedOutput = JSON.parse(fs.readFileSync(path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json')), 'utf8'));
+				const expectedOutput = JSON.parse(fs.readFileSync(path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json')), 'utf8'));
 
 				records.forEach((record, ind) => {
 					if (ind > 1) {
@@ -76,7 +76,7 @@ describe('transform - from files', () => {
 						// record = record.replace(/\r\n$/, ''); // Remove possible extra linebreaks at end of string
 						lines.map(generateMapLine);
 						testContext.appendMap(fonoMap);
-						let main = fonoMap.main() ? 'main:' : 'sub';
+						const main = fonoMap.main() ? 'main:' : 'sub';
 						// console.log('******************************')
 						// console.log('Fonomap: ', fonoMap)
 						// console.log('Record: ', record)
@@ -259,7 +259,7 @@ describe('transform - from files', () => {
 						});
 
 						function generateMapLine(line) {
-							let ind = line.substr(0, 3);
+							const ind = line.substr(0, 3);
 							line = line.substr(3);
 
 							if (fonoMap.has(ind)) {
@@ -284,7 +284,7 @@ describe('transform - from files', () => {
 						// }
 
 						// Checks if returned control/leader field structure matches fields from existing (expected) transformations
-						let matchStructure = function (input, expected, context) {
+						function matchStructure(input, expected, context) {
 							// console.log('input: ', input);
 							// console.log('expected: ', expected);
 							// console.log('ind: ', ind);
@@ -306,10 +306,10 @@ describe('transform - from files', () => {
 							});
 
 							return ok;
-						};
+						}
 
 						// Cheks if returned MarcRecords subfields exists in expected transformation
-						let matchSubfields = function (input) {
+						function matchSubfields(input) {
 							// console.log('Input: ', JSON.stringify(input, null, 2));
 
 							if (input === null || typeof (input) !== 'object') {
@@ -319,7 +319,7 @@ describe('transform - from files', () => {
 							let ok = true;
 							// Go trough each field:
 							input.fields.forEach(field => {
-								let comp = getExpectedField(field.tag);
+								const comp = getExpectedField(field.tag);
 								// console.log('Compare: ', field)
 								// console.log('to: ', comp)
 
@@ -348,7 +348,7 @@ describe('transform - from files', () => {
 								}
 							});
 							return ok;
-						};
+						}
 					});
 				});
 			}
@@ -385,176 +385,3 @@ function printNotFound(field) {
 function formatMarcPrint(subfield) {
 	console.log(subfield.code + ': ' + subfield.value);
 }
-
-// //Check subfield against expected fields subfields
-// if(!comp.some(rec => {
-// 	console.log('Rec: ', rec)
-// 	return field.tag === rec.tag && rec.subfields.some(field => {
-// 		console.log('Some: ', field)
-// 		return field.code === rec.code && field.value === rec.value;
-// 	})
-// })){
-// 	console.log(`Failed match check: ${JSON.stringify(sub, null, 2)} not found from expected ${JSON.stringify(expected.subfields, null, 2)} in ${context}`);
-// 	ok = false;
-// }else{
-// 	console.log('Found match')
-// };
-
-// input.fields.find(field => {
-// 	return field.tag === tag;
-// }).subfields.forEach(function(e){
-// 	console.log('---------------------------')
-// 	console.log('Checking for: ', e, ', ')
-// 	// console.log('Find: ', expected.subfields.some(field => {
-// 	// 	return field.code === e.code && field.value === e.value;
-// 	// }));
-
-// 	if(!expected.some(rec => {
-// 		console.log('Rec: ', rec)
-// 		return field.tag === rec.tag && rec.subfields.some(field => {
-// 			console.log('Some: ', field)
-// 			return field.code === e.code && field.value === e.value;
-// 		})
-// 	})){
-// 		console.log(`Failed match check: ${JSON.stringify(e, null, 2)} not found from expected ${JSON.stringify(expected.subfields, null, 2)} in ${context}`);
-// 		ok = false;
-// 	};
-// })
-
-// const config = [
-// 	{
-// 		fieldNums: ['112', '120'],
-// 		resFields: ['518'] //NV: nykykoodissa tämä on poikasen ensisijainen julkaisuvuosipaikka (008/07-10 ja 264$c [yyyy]), vrt. 222
-// 	}/*,{
-
-// 	}*/
-// ]
-
-// async function checkEachField(file){
-// 	config.forEach(async function(fieldConfig){
-// 		if(!(fieldConfig.fieldNums && fieldConfig.resFields)){
-// 			Logger.log('error', `invalid config field ${fieldConfig}`);
-// 		}
-
-// 		let records = await filterRecords(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'), fieldConfig.fieldNums); //['002', '190']
-// 		const s = new Readable();
-// 		s.push(Buffer.from(records, 'utf8'));
-// 		s.push(null);
-// 		let transformed = await testContext.default(s);
-// 		console.log('Transformed: ', JSON.stringify(transformed, null, 2))
-// 		const outPath = path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json'));
-// 		const expected = await filterResults(JSON.parse(fs.readFileSync(outPath, 'utf8')), fieldConfig.resFields);
-// 		console.log('Expected: ', JSON.stringify(expected, null, 2));
-// 		expect(transformed).to.eql(expected);
-// 	})
-// }
-
-// async function filterResults(records, fieldNums){
-// 	let res = [];
-// 	records.forEach(function(rec){
-// 		let resObj = {leader: '', fields: []};
-// 		rec.fields.forEach(function(field){
-// 			if(typeof(field.tag) === 'undefined' || fieldNums.some(e => field.tag === e)){
-// 				resObj.fields.push(field)
-// 			}
-// 		})
-// 		res.push(resObj);
-// 	})
-// 	return res;
-// }
-
-// async function filterRecords(stream, fieldNums){
-// 	let text = await getStream(stream);
-// 	let reg = new RegExp('(\\r\\n(?!(' + fieldNums.join('|') + ')|\\*\\*\\*).+?(?=\\r\\n|$))', 'g'); //Remove unneeded fields for test
-// 	text = text.replace(reg, '' );
-// 	return text;
-// }
-
-// before((done)=> {
-// 	console.log('Before')
-// 	setTimeout(function(){
-// 		console.log('Timeout')
-// 	}, 500);
-// 	let first = true;
-// 	fs.readdirSync(path.join(FIXTURES_PATH, 'in')).forEach(async (file) => {
-// 		if(first === true){
-// 			first = false;
-// 			let text = await getStream(fs.createReadStream(path.join(FIXTURES_PATH, 'in', file), 'utf8'));
-// 			records = text.split(/^\*\*\*+/m).filter(n => n)
-// 			console.log('Records: ', records)
-// 			done();
-// 		}
-// 	});
-// 	// it(file, async () => {
-// 	// 	await checkEachField(file);
-// 	// });
-// });
-
-// beforeEach(() => {
-// 	// 008 has current date in it
-// 	// testContext.default.__Rewire__('moment', sinon.fake.returns({
-// 	// 	format: sinon.fake.returns('c')
-// 	// }));
-// });
-
-// afterEach(() => {
-// 	// testContext.default.__ResetDependency__('moment');
-// });
-
-// Test data:
-
-// Äänitteet (main)
-// 140Beethoven, Ludwig van [1770-1827] (säv).
-// 140Hille, Sid [1961- ] (säv).
-
-// Teokset
-// 140Mäkelä, Maiju (säv, san).  LuoMuKanteleet (sov).
-// 140Tolvanen, Alisa (säv).  Tolvanen, Lotta (säv).  LuoMuKanteleet (sov).
-// 140Holly, Buddy [1936-1959].  Petty, Norman [1927-1984].
-
-// 140Hartikainen, Nuutti (säv).  Tolvanen, Saara (säv).  LuoMuKanteleet
-// 140(sov).
-
-// 140Kansansävelmä /1.  Kansanlaulu, Suomi /2-3.  Raskinen, Minna (sov
-// 140/1).  LuoMuKanteleet (sov /2-3).
-
-// 140Malkavaara, Jarmo (säv, san /Raamattu: Psalmi 42 ja 130 mukaan).
-// 140Bergholm, Mikael [1966- ] (sov).
-
-// 140Solovjov-Sedoi, Vasili [1907-1979] (säv).  Matusovski, Mihail
-// 140[1915-1990] (alkup san).  Puranen, Tuomo (sov).  Kristiina /pseud /
-// 140(= Solanterä, Kyllikki) (san).
-
-// 140Kansanlaulu /1,3.  Irvine, Andy (säv, san /2).  Rig ma roll (sov /1).
-// 140Jaskari, Jaakko (sov /3).  Kyrö, Jaakko (sov /3).
-
-// 162SV1932
-// 162SV1902 valm
-// 162SV1684 julk
-// 162SV1743 noin
-// 162SV2016 ensi
-// 162SV1900 uud
-// 162SV1903 ork
-// 162SV2016 sov
-// 62SV1500-luku
-
-//-----------------------------------
-
-// 244Tekstilehtinen.
-// 244Esittelylehtinen englanniksi ja saksaksi.
-// 244Esittelylehtinen.
-
-// 244Esittelylehtinen englanniksi, ranskaksi, saksaksi ja hollanniksi.
-// 244Libretto saksaksi, englanniksi ja ranskaksi.  SACD.
-
-//-----------------------------------
-
-// 243FIUNP8000502
-// 243GBVEV1700240
-// 243FIKHY1700040
-// 243FIMF61700004
-// 243GBMZL1700002
-// 243FIZEN1700009
-// 243ISRC FIPEB17
-// 243FI-M6A-17-00
-// 243NOEIT1501020
