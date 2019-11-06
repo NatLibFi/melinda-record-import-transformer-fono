@@ -35,6 +35,8 @@ import sinonChai from 'sinon-chai';
 import * as testContext from './transform';
 import {Utils} from '@natlibfi/melinda-commons';
 import {MarcRecord} from '@natlibfi/marc-record';
+import {isEqual} from 'lodash';
+
 // import {Readable} from 'stream';
 
 const {createLogger} = Utils;
@@ -59,12 +61,17 @@ describe('transform - from files', () => {
 				const expectedOutput = JSON.parse(fs.readFileSync(path.join(FIXTURES_PATH, 'out', file.replace(/.txt/, '.json')), 'utf8'));
 
 				records.forEach((record, ind) => {
-					if (ind > 1) {
-						console.log('Breaking');
+					if (ind > 3) {
+						console.log('Amount of records tested per file limited, breaking');
 						return;
 					}
 
 					let lines = record.split(/[\r\n]+/).filter(n => n); // Split each line to array. Remove first, seems to be index not used in transformation
+
+					// console.log('******************************');
+					// console.log(record);
+					// console.log(JSON.stringify(expectedOutput[ind], null, 2));
+					// console.log('******************************');
 
 					describe('transform - for record: ' + lines[0], () => {
 						lines.shift(); // Remove first (index)
@@ -277,11 +284,11 @@ describe('transform - from files', () => {
 							});
 						}
 
-						// function getExpectedFields(tags) {
-						// 	return expectedOutput[ind].fields.filter(field => {
-						// 		return tags.includes(field.tag);
-						// 	});
-						// }
+						function getExpectedFields(tags) {
+							return expectedOutput[ind].fields.filter(field => {
+								return tags.includes(field.tag);
+							});
+						}
 
 						// Checks if returned control/leader field structure matches fields from existing (expected) transformations
 						function matchStructure(input, expected, context) {
@@ -317,34 +324,20 @@ describe('transform - from files', () => {
 							}
 
 							let ok = true;
+
 							// Go trough each field:
 							input.fields.forEach(field => {
-								const comp = getExpectedField(field.tag);
-								// console.log('Compare: ', field)
-								// console.log('to: ', comp)
+								// Find fields to compare by tag
+								// console.log('Field: ', field);
 
-								if (typeof (comp) === 'undefined') {
-									printNotFound(field);
+								const compFields = getExpectedFields(field.tag);
+								if (!compFields.some(expt => {
+									// console.log('Some: ', expt);
+									// console.log('Eq: ', isEqual(expt, field));
+									return isEqual(expt, field);
+								})) {
+									printNotFoundExpected(field, compFields);
 									ok = false;
-								} else {
-									// Go trough each subfield of input
-									field.subfields.forEach(sub => {
-										// console.log('---------------------------')
-										// console.log('Checking: ', sub)
-										// console.log('against: ', comp)
-
-										// Check comparison subfield against expected fields subfields
-										if (!comp.subfields.some(compSub => {
-											// console.log('Some: ', field)
-											return compSub.code === sub.code && compSub.value === sub.value;
-										})) {
-											printNotFoundExpected(sub, comp.subfields, field);
-											ok = false;
-										}
-										// else{
-										// 	console.log('Found match')
-										// };
-									});
 								}
 							});
 							return ok;
@@ -362,26 +355,11 @@ function printFail(val, expected, context, ind) {
 	console.log('---------------------------');
 }
 
-function printNotFoundExpected(sub, subfields, field) {
+function printNotFoundExpected(field, compField) {
 	console.log('---------------------------');
-	console.log(`Failed match check in tag ${field.tag} - subfield not found:`);
-	formatMarcPrint(sub);
+	console.log(`Failed match check in tag ${field.tag} - field not found:`);
+	console.log(JSON.stringify(field, null, 2));
 	console.log('Expected:');
-	subfields.forEach(s => {
-		formatMarcPrint(s);
-	});
+	console.log(JSON.stringify(compField, null, 2));
 	console.log('---------------------------');
-}
-
-function printNotFound(field) {
-	console.log('---------------------------');
-	console.log(`Failed match check with tag ${field.tag} - tag not found:`);
-	field.subfields.forEach(s => {
-		formatMarcPrint(s);
-	});
-	console.log('---------------------------');
-}
-
-function formatMarcPrint(subfield) {
-	console.log(subfield.code + ': ' + subfield.value);
 }

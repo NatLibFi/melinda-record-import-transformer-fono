@@ -179,6 +179,7 @@ export function appendMap(fonoMap) {
 					data += line;
 				} else {
 					data = data + ' ' + line;
+					data = data.replace(/\s\s+/g, ' ');
 				}
 			});
 			return data;
@@ -1750,6 +1751,8 @@ export function handle150and151(fonoMap, marcRecord, Logger) {
 		console.log('*************************');
 		console.log('Complex, todo');
 		console.log('*************************');
+		console.log(data);
+		console.log('*************************');
 
 		// Hakuaputiedot
 
@@ -2030,6 +2033,7 @@ export function handle190and191(fonoMap, marcRecord, Logger) {
 				// Below specs for 190
 				// Osakohteet
 				// 511 0_ $a sellaisenaan
+				person = person.trim();
 				if (person.match(/[^.:,]$/)) {
 					output += person + '. ';
 				} else {
